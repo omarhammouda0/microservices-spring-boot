@@ -13,7 +13,7 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: validate
     show-sql: true
     properties:
       hibernate:
@@ -45,12 +45,11 @@ resilience4j:
           seconds: 2
         retry-exceptions:
           - feign.FeignException
-          - java.lang.RuntimeException
           - feign.FeignException.ServiceUnavailable
-          - org.springframework.cloud.client.loadbalancer.RetryableStatusCodeException
-          - org.springframework.cloud.client.loadbalancer.ClientHttpResponseStatusCodeException
-          - org.springframework.cloud.client.loadbalancer.reactive.RetryableStatusCodeException
-          - java.lang.Exception
+          - feign.RetryableException
+          - java.net.ConnectException
+          - java.util.concurrent.TimeoutException
+
 
   circuitbreaker:
     instances:

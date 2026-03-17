@@ -22,8 +22,8 @@ public class UserServiceClient {
     private final UserClient userClient;
     private Map<Long , UserResponseDTO> userCache = new ConcurrentHashMap<> ();
 
-    @Retry (name = "userservice")
-    @CircuitBreaker (name = "userservice", fallbackMethod = "getUserByIdFallback")
+    @CircuitBreaker(name = "userservice")
+    @Retry(name = "userservice", fallbackMethod = "getUserByIdFallback")
 
     public UserResponseDTO getUser (Long userId) {
 
