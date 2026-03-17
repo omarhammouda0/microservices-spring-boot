@@ -19,6 +19,12 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
 
+  data:
+    redis:
+      host: redis
+      port: 6379
+      timeout: 2000ms
+
 eureka:
   client:
     register-with-eureka: true
@@ -78,3 +84,15 @@ management:
 logging:
   level:
     org.springframework.cloud.gateway: debug
+
+
+product-service:
+  depends_on:
+    postgres-productdb:
+      condition: service_healthy
+    eureka-server:
+      condition: service_healthy
+    user-service:
+      condition: service_started
+    redis:
+      condition: service_healthy

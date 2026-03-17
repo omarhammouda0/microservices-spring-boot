@@ -7,11 +7,11 @@ import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import io.github.resilience4j.retry.annotation.Retry;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
-
+import java.time.Duration;
 import java.time.Instant;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+
 
 @AllArgsConstructor
 @Slf4j
@@ -20,7 +20,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class UserServiceClient {
 
     private final UserClient userClient;
-    private Map<Long , UserResponseDTO> userCache = new ConcurrentHashMap<> ();
+    private final RedisTemplate<String, UserResponseDTO> redisTemplate;
 
     @CircuitBreaker(name = "userservice")
     @Retry(name = "userservice", fallbackMethod = "getUserByIdFallback")
@@ -29,15 +29,16 @@ public class UserServiceClient {
 
         log.info("ATTEMPT: Fetching user with id {}", userId);
 
-        if (userId == 999) {
-            throw new RuntimeException("Test retry");
-        }
-
         UserResponseDTO user = userClient.getUserById(userId);
-        userCache.put ( userId, user );
-        log.info ( "Caching user id {}" , userId );
 
-        return user ;
+        redisTemplate.opsForValue().set(
+                "user:" + userId,
+                user,
+                Duration.ofMinutes(10)
+        );
+        log.info("Cached user {} in Redis", userId);
+
+        return user;
     }
 
     private UserResponseDTO getUserByIdFallback(Long userId , Throwable  ex) {
@@ -49,13 +50,14 @@ public class UserServiceClient {
                     userId, ex.getClass().getSimpleName());
         }
 
-       if ( userCache.containsKey (userId) ) {
+        UserResponseDTO cached = redisTemplate.opsForValue().get("user:" + userId);
 
-           log.info ( "Returning cached data for the user  {}" , userId );
-           return userCache.get ( userId );
-       }
+        if (cached != null) {
+            log.info("Returning Redis cached data for user {}", userId);
+            return cached;
+        }
 
-       log.warn (  "No cached data for the user  {}" , userId );
+        log.warn("No cached data in Redis for user {}", userId);
 
         return new UserResponseDTO (
                 userId ,
