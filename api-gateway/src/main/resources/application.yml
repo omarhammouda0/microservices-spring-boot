@@ -26,6 +26,16 @@ eureka:
     prefer-ip-address: false
     instance-id: ${spring.application.name}:${spring.application.instance_id:${random.value}}
 
+management:
+  tracing:
+    enabled: true
+    sampling:
+      probability: 1.0
+  zipkin:
+    tracing:
+      endpoint: http://zipkin:9411/api/v2/spans
+
+
 logging:
   level:
     org.springframework.cloud.gateway: debug

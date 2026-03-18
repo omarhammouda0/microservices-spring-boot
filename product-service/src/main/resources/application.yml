@@ -13,7 +13,7 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: validate
+      ddl-auto: update
     show-sql: true
     properties:
       hibernate:
@@ -24,6 +24,7 @@ spring:
       host: redis
       port: 6379
       timeout: 2000ms
+
 
 eureka:
   client:
@@ -43,12 +44,10 @@ resilience4j:
     instances:
       userservice:
         max-attempts: 3
-        wait-duration:
-          seconds: 0.5
+        wait-duration: 500ms
         enable-exponential-backoff: true
         exponential-backoff-multiplier: 2
-        exponential-max-wait-duration:
-          seconds: 2
+        exponential-max-wait-duration: 2s
         retry-exceptions:
           - feign.FeignException
           - feign.FeignException.ServiceUnavailable
@@ -69,7 +68,16 @@ resilience4j:
         record-exceptions:
           - feign.FeignException
 
+
 management:
+  tracing:
+    enabled: true
+    sampling:
+      probability: 1.0
+  zipkin:
+    tracing:
+      endpoint: http://zipkin:9411/api/v2/spans
+
   endpoints:
     web:
       exposure:
@@ -82,17 +90,7 @@ management:
       enabled: true
 
 logging:
-  level:
-    org.springframework.cloud.gateway: debug
+  pattern:
+    level: "%5p [${spring.application.name:},%X{traceId:-},%X{spanId:-}]"
 
 
-product-service:
-  depends_on:
-    postgres-productdb:
-      condition: service_healthy
-    eureka-server:
-      condition: service_healthy
-    user-service:
-      condition: service_started
-    redis:
-      condition: service_healthy
