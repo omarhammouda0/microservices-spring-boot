@@ -29,16 +29,45 @@ public class UserServiceClient {
 
         log.info("ATTEMPT: Fetching user with id {}", userId);
 
-        UserResponseDTO user = userClient.getUserById(userId);
+            var cashedUser = getFromRedis ( userId );
 
-        redisTemplate.opsForValue().set(
-                "user:" + userId,
-                user,
-                Duration.ofMinutes(10)
-        );
-        log.info("Cached user {} in Redis", userId);
+            if ( cashedUser != null ) {
+                log.info("Cache hit — returning user {} from Redis", userId);
+                return cashedUser;
+            }
 
-        return user;
+
+        UserResponseDTO user = userClient.getUserById( userId );
+
+            try {
+                redisTemplate.opsForValue().set(
+                        "user:" + userId,
+                        user,
+                        Duration.ofMinutes(10)
+                );
+                log.info("Cached user {} in Redis", userId);
+
+            } catch (Exception e) {
+                log.warn ("Error in cached user {} in Redis", userId, e);
+
+            }
+
+            return user;
+
+    }
+
+    private UserResponseDTO getFromRedis (Long userId) {
+
+        try {
+            return redisTemplate.opsForValue ( ).get ( "user:" + userId );
+
+        } catch (Exception e) {
+
+            log.warn ( "Failed to read user {} from Redis. Reason: {}" , userId , e.getMessage ( ) );
+            return null;
+        }
+
+
     }
 
     private UserResponseDTO getUserByIdFallback(Long userId , Throwable  ex) {
@@ -50,11 +79,11 @@ public class UserServiceClient {
                     userId, ex.getClass().getSimpleName());
         }
 
-        UserResponseDTO cached = redisTemplate.opsForValue().get("user:" + userId);
+        UserResponseDTO cashedUser  = getFromRedis ( userId );
 
-        if (cached != null) {
+        if (cashedUser  != null) {
             log.info("Returning Redis cached data for user {}", userId);
-            return cached;
+            return cashedUser ;
         }
 
         log.warn("No cached data in Redis for user {}", userId);
