@@ -72,15 +72,17 @@ services:
     environment:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres-userdb:5432/userdb
       - SPRING_DATASOURCE_USERNAME=postgres
-      - SPRING_DATASOURCE_PASSWORD=omar2015
+      - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD}
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
-      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=validate
     networks:
       - microservices-network
     depends_on:
       postgres-userdb:
         condition: service_healthy
       eureka-server:
+        condition: service_healthy
+      zipkin:
         condition: service_healthy
 
   # Product Service
@@ -92,7 +94,7 @@ services:
     environment:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres-productdb:5432/productdb
       - SPRING_DATASOURCE_USERNAME=postgres
-      - SPRING_DATASOURCE_PASSWORD=omar2015
+      - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD}
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
       - SPRING_JPA_HIBERNATE_DDL_AUTO=update
     networks:
@@ -105,6 +107,8 @@ services:
       user-service:
         condition: service_started
       redis:
+        condition: service_healthy
+      zipkin:
         condition: service_healthy
 
   # API Gateway
@@ -124,6 +128,8 @@ services:
         condition: service_started
       product-service:
         condition: service_started
+      zipkin:
+        condition: service_healthy
 
   redis:
     image: redis:7-alpine
@@ -153,4 +159,32 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+      start_period: 30s
 
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    networks:
+      - microservices-network
+    depends_on:
+      - user-service
+      - product-service
+      - api-gateway
+
+  grafana:
+    image: grafana/grafana:latest
+
+    container_name: grafana
+
+    ports:
+      - "3000:3000"
+
+    networks:
+      - microservices-network
+
+    depends_on:
+      - prometheus

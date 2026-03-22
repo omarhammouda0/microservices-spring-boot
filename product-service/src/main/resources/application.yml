@@ -70,6 +70,12 @@ resilience4j:
 
 
 management:
+
+  metrics:
+    distribution:
+      percentiles-histogram:
+        http.server.requests: true
+
   tracing:
     enabled: true
     sampling:
@@ -81,7 +87,7 @@ management:
   endpoints:
     web:
       exposure:
-        include: health,circuitbreakers,circuitbreakerevents,retries,retryevents
+        include: health,circuitbreakers,circuitbreakerevents,retries,retryevents,prometheus
   endpoint:
     health:
       show-details: always

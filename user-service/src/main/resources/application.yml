@@ -34,11 +34,15 @@ eureka:
   server:
     wait-time-in-ms-when-sync-empty: 0
 
+
+
 management:
+
   tracing:
     enabled: true
     sampling:
       probability: 1.0
+
   zipkin:
     tracing:
       endpoint: http://zipkin:9411/api/v2/spans
@@ -46,8 +50,13 @@ management:
   endpoints:
     web:
       exposure:
-        include: health
+        include: health,prometheus
+
   endpoint:
     health:
       show-details: always
 
+  metrics:
+    distribution:
+      percentiles-histogram:
+        http.server.requests: true
