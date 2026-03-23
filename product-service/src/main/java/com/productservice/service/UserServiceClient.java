@@ -70,7 +70,7 @@ public class UserServiceClient {
 
     }
 
-    private UserResponseDTO getUserByIdFallback(Long userId , Throwable  ex) {
+     UserResponseDTO getUserByIdFallback(Long userId , Throwable  ex) {
 
         if (ex instanceof CallNotPermittedException) {
             log.warn("Circuit is OPEN for user {}. Trying cache...", userId);
