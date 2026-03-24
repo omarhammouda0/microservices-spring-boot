@@ -11,6 +11,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Optional;
 
 
 @AllArgsConstructor
@@ -56,7 +57,7 @@ public class UserServiceClient {
 
     }
 
-    private UserResponseDTO getFromRedis (Long userId) {
+    private UserResponseDTO getFromRedis(Long userId) {
 
         try {
             return redisTemplate.opsForValue ( ).get ( "user:" + userId );
@@ -70,23 +71,23 @@ public class UserServiceClient {
 
     }
 
-     UserResponseDTO getUserByIdFallback(Long userId , Throwable  ex) {
+    UserResponseDTO getUserByIdFallback(Long userId , Throwable ex) {
 
         if (ex instanceof CallNotPermittedException) {
-            log.warn("Circuit is OPEN for user {}. Trying cache...", userId);
+            log.warn ( "Circuit is OPEN for user {}. Trying cache..." , userId );
         } else {
-            log.warn("User Service unavailable for user {}. Using fallback. Reason: {}",
-                    userId, ex.getClass().getSimpleName());
+            log.warn ( "User Service unavailable for user {}. Using fallback. Reason: {}" ,
+                    userId , ex.getClass ( ).getSimpleName ( ) );
         }
 
-        UserResponseDTO cashedUser  = getFromRedis ( userId );
+        UserResponseDTO cashedUser = getFromRedis ( userId );
 
-        if (cashedUser  != null) {
-            log.info("Returning Redis cached data for user {}", userId);
-            return cashedUser ;
+        if (cashedUser != null) {
+            log.info ( "Returning Redis cached data for user {}" , userId );
+            return cashedUser;
         }
 
-        log.warn("No cached data in Redis for user {}", userId);
+        log.warn ( "No cached data in Redis for user {}" , userId );
 
         return new UserResponseDTO (
                 userId ,
@@ -99,3 +100,5 @@ public class UserServiceClient {
     }
 
 }
+
+

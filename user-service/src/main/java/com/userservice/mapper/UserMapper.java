@@ -1,5 +1,7 @@
 package com.userservice.mapper;
 
+import com.userservice.dto.AuthResponseDTO;
+import com.userservice.dto.RegisterRequestDTO;
 import com.userservice.dto.UserCreateDTO;
 import com.userservice.dto.UserResponseDTO;
 import com.userservice.entity.User;
@@ -23,6 +25,18 @@ public class UserMapper {
 
     }
 
+    public User toUser (RegisterRequestDTO registerRequestDTO) {
+
+        return User.builder ( )
+
+                .name ( registerRequestDTO.name ( ) )
+                .email ( registerRequestDTO.email ( ) )
+                .isActive ( true )
+
+                .build ( );
+
+    }
+
     public UserResponseDTO toUserDTO (User user) {
 
         return new UserResponseDTO (
@@ -36,5 +50,7 @@ public class UserMapper {
                 );
 
     }
+
+
 
 }
