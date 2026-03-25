@@ -4,6 +4,7 @@ import com.userservice.dto.AuthResponseDTO;
 import com.userservice.dto.LoginRequestDTO;
 import com.userservice.dto.RegisterRequestDTO;
 import com.userservice.enums.Role;
+import com.userservice.exception.types.InvalidCredentialsException;
 import com.userservice.exception.types.UserAlreadyExistsException;
 import com.userservice.exception.types.UserNotFoundException;
 import com.userservice.mapper.UserMapper;
@@ -11,6 +12,7 @@ import com.userservice.repository.UserRepository;
 import com.userservice.security.JwtService;
 import lombok.AllArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -55,7 +57,13 @@ public class AuthService {
         String email = dto.email ( ).trim ( );
         String password = dto.password ( );
 
-        authenticationManager.authenticate ( new UsernamePasswordAuthenticationToken ( email, password ) );
+        try {
+            authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(email, password)
+            );
+        } catch (BadCredentialsException e) {
+            throw new InvalidCredentialsException ();
+        }
 
         var user = userRepository.findByEmailIgnoreCase(email).
                 orElseThrow ( () -> new UserNotFoundException ( "User not found" ) );

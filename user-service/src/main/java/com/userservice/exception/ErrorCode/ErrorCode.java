@@ -9,6 +9,7 @@ public enum ErrorCode {
     USER_NOT_ACTIVE,
     INVALID_REQUEST,
     USER_NOT_FOUND,
+    INCORRECT_CREDENTIALS
 
 
 }
