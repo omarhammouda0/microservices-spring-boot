@@ -8,7 +8,6 @@ import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 
 
-
 @SpringBootApplication
 @EnableDiscoveryClient
 @EnableFeignClients
@@ -19,7 +18,9 @@ import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 public class ProductServiceApplication {
 
     public static void main(String[] args) {
+
         SpringApplication.run ( ProductServiceApplication.class , args );
+
     }
 
 }

@@ -1,6 +1,7 @@
 package com.productservice.service;
 
 import com.productservice.dto.*;
+import com.productservice.entity.Product;
 import com.productservice.exception.types.ProductNotFoundException;
 import com.productservice.exception.types.UserNotActiveException;
 import com.productservice.mapper.ProductMapper;
@@ -8,7 +9,11 @@ import com.productservice.repository.ProductRepository;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 
 @Slf4j
@@ -85,7 +90,6 @@ public class ProductService {
 
     }
 
-
     public ProductResponseDTO updateProduct(Long id, ProductUpdateDTO dto) {
 
         log.info ( "Updating product with id {}" , id );
@@ -128,4 +132,5 @@ public class ProductService {
     }
 
 
-}
+    }
+

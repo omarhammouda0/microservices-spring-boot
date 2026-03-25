@@ -6,11 +6,18 @@ spring:
     name: api-gateway
   cloud:
     gateway:
+      default-filters:
+        - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin
       routes:
         - id: user-service
           uri: lb://USER-SERVICE
           predicates:
             - Path=/users/**
+
+        - id: user-service-auth
+          uri: lb://USER-SERVICE
+          predicates:
+            - Path=/auth/**
 
         - id: product-service
           uri: lb://PRODUCT-SERVICE
