@@ -24,6 +24,8 @@ spring:
           predicates:
             - Path=/products/**
 
+
+
 eureka:
   client:
     service-url:
@@ -53,6 +55,8 @@ management:
     tracing:
       endpoint: http://zipkin:9411/api/v2/spans
 
+jwt:
+  secret: ${JWT_SECRET}
 
 logging:
   level:

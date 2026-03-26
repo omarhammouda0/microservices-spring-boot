@@ -6,6 +6,8 @@ import com.userservice.enums.Role;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
+import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.*;
@@ -36,26 +38,36 @@ public class practice {
         List<User> users = List.of ( u1 , u2 , u3 , u4 , u5 , u6 , u7 );
 
         practice p = new practice ( );
-        System.out.println ( p.getOldestUserByRole ( users ) );
+        System.out.println ( p.getCountOfUsersByActive ( users ) );
+
+//        Predicate<User> activeUser = User::getIsActive;
+//        users.stream().filter( activeUser );
 
 
+         Function <User , String> returnUserEmail = User::getEmail;
+
+         users.stream ()
+                 .map ( returnUserEmail );
     }
 
-//        public String returnFirstAdmin (List<User> users) {
-//
-//            return users.stream ( )
-//                    .filter ( user -> user.getRole ( ).equals ( "ADMIN" ) )
-//                    .findFirst ( )
-//                    .map ( User::getName )
-//                    .orElse ( "No admin found" );
+
+//    Write a Function<User, String> that takes a user and returns their email.
+//    Assign it to a variable and use it in a stream map.
 
 
-//    public String returnEmail (User user) {
-//
-//        var email = Optional.ofNullable ( user.getEmail () );
-//        return email.orElse ( "no-email@default.com" );
-//    }
+//    Exercise 1
+//    Write a Predicate<User> that returns true if the user is active.
+//    Assign it to a variable and use it in a stream filter.
 
+
+    public Map <String , Double> getAverageIdByRole (List<User> users) {
+
+        return users
+                .stream ()
+                .collect ( groupingBy ( User::getRole  ,
+                        Collectors.averagingLong ( User::getId ) ));
+
+    }
 
     public String getEmailOfTheFirstInactiveUser(List<User> users) {
 
@@ -65,7 +77,6 @@ public class practice {
                 .map ( User::getEmail )
                 .orElseThrow ( () -> new RuntimeException ( "No inactive user found" ) );
     }
-
 
     public Map <String, List<String> > getUsersGroupedByRole(List<User> users) {
 
@@ -101,7 +112,36 @@ public class practice {
 
     }
 
+    public Map <String , String> getAllUsersNamesByRole (List<User> users) {
+
+        return users
+                .stream ()
+                .collect ( groupingBy ( User::getRole ,
+                        mapping ( User::getName , Collectors.joining ( "," ) )
+                ) );
+
+    }
+
+    public Map <Boolean , Long> getCountOfUsersByActive (List<User> users) {
+
+        return users.stream ()
+                .collect ( partitioningBy (
+                        User::getIsActive ,
+                        Collectors.counting ())
+
+                );
+    }
+
 }
+
+//Exercise 12
+//From the user list, partition users into active and inactive,
+//and for each partition return the count of users.
+
+//Exercise 11
+//From the user list, return a Map<String, String> where the key is the role
+// and the value is a comma-separated string of all user names in that role.
+//For example: "USER" -> "Omar, Anna, Karim"
 
 //Partition users into two groups — active and inactive.
 //Return a map where true maps to the list of active user
@@ -118,3 +158,17 @@ public class practice {
 //From the list, get the email of the first inactive user.
 //If none exists, throw an exception with the message "No inactive user found".
 
+//        public String returnFirstAdmin (List<User> users) {
+//
+//            return users.stream ( )
+//                    .filter ( user -> user.getRole ( ).equals ( "ADMIN" ) )
+//                    .findFirst ( )
+//                    .map ( User::getName )
+//                    .orElse ( "No admin found" );
+
+
+//    public String returnEmail (User user) {
+//
+//        var email = Optional.ofNullable ( user.getEmail () );
+//        return email.orElse ( "no-email@default.com" );
+//    }
