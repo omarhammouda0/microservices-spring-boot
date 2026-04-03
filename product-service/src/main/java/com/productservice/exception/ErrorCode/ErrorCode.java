@@ -8,7 +8,8 @@ public enum ErrorCode {
     USER_ALREADY_EXISTS (  ),
     INVALID_REQUEST,
     USER_NOT_FOUND,
-    USER_NOT_ACTIVE
+    USER_NOT_ACTIVE,
+    INVENTORY_NOT_FOUND
 
 
 }

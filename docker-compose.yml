@@ -6,6 +6,7 @@ volumes:
   postgres-user-data:
   postgres-product-data:
   redis-data:
+  rabbitmq_data:
 
 services:
   # Database for User Service
@@ -101,6 +102,9 @@ services:
       - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD}
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
       - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+      - SPRING_RABBITMQ_HOST=rabbitmq
+      - SPRING_RABBITMQ_USERNAME=${RABBITMQ_DEFAULT_USER}
+      - SPRING_RABBITMQ_PASSWORD=${RABBITMQ_DEFAULT_PASS}
     networks:
       - microservices-network
     depends_on:
@@ -192,3 +196,31 @@ services:
 
     depends_on:
       - prometheus
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    hostname: rabbitmq-node
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+
+    networks:
+      - microservices-network
+
+    environment:
+
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS}
+
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+
+    healthcheck:
+
+      test: [ "CMD", "rabbitmq-diagnostics", "check_running" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+

@@ -1,13 +1,11 @@
 package com.userservice;
 
 import com.userservice.entity.User;
-import com.userservice.enums.Role;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
-import java.util.function.Function;
-import java.util.function.Predicate;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.*;
@@ -37,28 +35,65 @@ public class practice {
 
         List<User> users = List.of ( u1 , u2 , u3 , u4 , u5 , u6 , u7 );
 
-        practice p = new practice ( );
-        System.out.println ( p.getCountOfUsersByActive ( users ) );
+        practice p = new practice ();
 
-//        Predicate<User> activeUser = User::getIsActive;
-//        users.stream().filter( activeUser );
+        Supplier<List<User>> userSupplier = () -> users.stream ()
+                .filter ( User::getIsActive )
+                .collect ( Collectors.toList () );
 
+         userSupplier.get ()
+                 .forEach ( System.out::println );
 
-         Function <User , String> returnUserEmail = User::getEmail;
-
-         users.stream ()
-                 .map ( returnUserEmail );
     }
 
+//    Exercise 6
+//    Write a Supplier<List<User>> that returns a new list containing only active users.
+//    Assign it to a variable and call it to get the list.
 
-//    Write a Function<User, String> that takes a user and returns their email.
-//    Assign it to a variable and use it in a stream map.
 
 
-//    Exercise 1
-//    Write a Predicate<User> that returns true if the user is active.
-//    Assign it to a variable and use it in a stream filter.
 
+//    Exercise 5
+//    Use andThen to chain two consumers — one prints the name, one prints the role.
+//    Apply the chained consumer to all users via forEach.
+
+    //    Consumer <User> printUserNameAndEmail =
+//            user -> System.out.println
+//                    (  "Name: " + user.getName () + "| Email: " + user.getEmail () + "." );
+//
+//    Consumer <User> printName = user -> System.out.println ( user.getName () );
+//    Consumer <User> printRole = user -> System.out.println ( user.getRole () );
+//    Consumer <User> chain = printName.andThen( printRole );
+
+//    Exercise 4
+//    Write a Consumer<User> that prints the user's name and email in this format:
+//            "Name: Omar | Email: omar@test.com".
+//    Assign it to a variable and use it in a stream forEach.
+
+        //    Exercise 3
+//    Write a BiFunction<User, String, Boolean> that takes a user and a role,
+//   and returns true if the user has that role.
+//   Assign it to a variable and test it by calling it directly on a user from your list.
+//    Go.
+
+
+//    BiFunction <User  , String, Boolean> checkIfUserHasRole =
+//            (user , role) -> user.getRole ( ).equals ( role );
+
+//        Exercise 1
+//        Write a Predicate<User> that returns true if the user is active.
+//        Assign it to a variable and use it in a stream filter.
+
+//    Predicate<User> activeUser = User::getIsActive;
+//        users.stream().filter( activeUser );
+
+//        Exercise 2
+//        Write a Function<User, String> that takes a user and returns their email.
+//                Assign it to a variable and use it in a stream map.
+
+//    Function <User , String> returnUserEmail = User::getEmail;
+//         users.stream ()
+//                 .map ( returnUserEmail );
 
     public Map <String , Double> getAverageIdByRole (List<User> users) {
 
