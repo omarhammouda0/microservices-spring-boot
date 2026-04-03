@@ -5,8 +5,10 @@ networks:
 volumes:
   postgres-user-data:
   postgres-product-data:
+  postgres-order-data:
   redis-data:
   rabbitmq_data:
+
 
 services:
   # Database for User Service
@@ -45,6 +47,26 @@ services:
       - microservices-network
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Database for Order Service
+  postgres-orderdb:
+    image: postgres:15-alpine
+    container_name: postgres-orderdb
+    environment:
+      POSTGRES_DB: orderdb
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - "5435:5432"
+    volumes:
+      - postgres-order-data:/var/lib/postgresql/data
+    networks:
+      - microservices-network
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -115,6 +137,37 @@ services:
       user-service:
         condition: service_started
       redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
+  # Order Service
+  order-service:
+    build: ./order-service
+    image: order-service:1.0
+    container_name: order-service
+    ports:
+      - "8083:8083"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres-orderdb:5432/orderdb
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD}
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+      - SPRING_RABBITMQ_HOST=rabbitmq
+      - SPRING_RABBITMQ_USERNAME=${RABBITMQ_DEFAULT_USER}
+      - SPRING_RABBITMQ_PASSWORD=${RABBITMQ_DEFAULT_PASS}
+    networks:
+      - microservices-network
+    depends_on:
+
+      postgres-orderdb:
+        condition: service_healthy
+      eureka-server:
+        condition: service_healthy
+      user-service:
+        condition: service_started
+      rabbitmq:
         condition: service_healthy
 
 

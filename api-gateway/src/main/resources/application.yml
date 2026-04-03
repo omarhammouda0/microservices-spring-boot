@@ -30,6 +30,12 @@ spring:
           - Path=/inventory/**
 
 
+        - id: order-service
+          uri: lb://ORDER-SERVICE
+          predicates:
+            - Path=/orders/**
+
+
 
 eureka:
   client:
