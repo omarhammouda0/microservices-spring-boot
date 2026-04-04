@@ -14,7 +14,8 @@ public class InventoryMapper {
         return new InventoryResponseDTO (
 
                 inventory.getProductId () ,
-                inventory.getQuantity ( )
+                inventory.getQuantity ( ) ,
+                inventory.getProduct ().getPrice ()
         );
 
     }
