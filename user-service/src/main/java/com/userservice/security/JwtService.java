@@ -53,6 +53,7 @@ public class JwtService {
 
     public String generateToken(User user) {
         return Jwts.builder()
+                .claim("userId", user.getId())
                 .subject(user.getEmail())
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + expiration))

@@ -1,0 +1,132 @@
+package com.orderservice.service;
+
+import com.orderservice.dto.*;
+import com.orderservice.exception.types.ProductNotFoundException;
+import com.orderservice.exception.types.UserNotActiveException;
+import com.orderservice.mapper.ProductMapper;
+import com.orderservice.repository.ProductRepository;
+import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+
+
+@Slf4j
+@AllArgsConstructor
+
+@Service
+public class ProductService {
+
+    private final ProductRepository productRepository;
+    private final ProductMapper productMapper;
+    private final UserServiceClient userServiceClient;
+
+    public ProductResponseDTO createProduct(ProductCreateDTO dto) {
+
+        log.info ( "Creating product for user {}" , dto.userId ( ) );
+
+        UserResponseDTO user = userServiceClient.getUser ( dto.userId ( ) );
+
+        if (!"Service Unavailable".equals(user.name()) && !user.active()) {
+            throw new UserNotActiveException(dto.userId());
+        }
+
+
+        var toSave = productMapper.toEntity ( dto );
+        var saved = productRepository.save ( toSave );
+
+        log.info ( "Product {} created" , saved.getId ( ) );
+
+        return productMapper.toResponseDTO ( saved );
+    }
+
+    public ProductWithUserDTO getProductById(Long id) {
+
+        log.info ( "Fetching the product with the id {} " , id );
+
+        var product = productRepository.findById ( id ).orElseThrow ( () ->
+                new ProductNotFoundException ( id ) );
+
+        log.info ( "Fetching the user with the id {} " , product.getUserId ( ) );
+
+        UserResponseDTO user =  userServiceClient.getUser ( product.getUserId ( ) );
+
+        if (!"Service Unavailable".equals(user.name()) && !user.active()) {
+            throw new UserNotActiveException(product.getUserId());
+        }
+
+        return productMapper.toProductWithUserDTO ( product , user );
+
+    }
+
+    public List<ProductResponseDTO> getAllProducts() {
+
+        log.info ( "Fetching all products" );
+
+        var products = productRepository.findAll ( );
+
+        return products.stream ( )
+                .map ( productMapper::toResponseDTO )
+                .toList ( );
+
+    }
+
+    public List<ProductResponseDTO> getProductsByUserId(Long userId) {
+
+        log.info ( "Fetching products for user with id {}" , userId );
+
+        userServiceClient.getUser ( userId );
+
+        var products = productRepository.findByUserId ( userId );
+
+        return products.stream ( )
+                .map ( productMapper::toResponseDTO )
+                .toList ( );
+
+    }
+
+    public ProductResponseDTO updateProduct(Long id, ProductUpdateDTO dto) {
+
+        log.info ( "Updating product with id {}" , id );
+
+        if (dto.name () == null && dto.price () == null) {
+            log.error ( "No valid fields provided for update for product id {}" , id );
+            throw new IllegalStateException ( "At least one field (name, price) must be provided for update." );
+        }
+
+        var product = productRepository.findById ( id ).orElseThrow ( () ->
+                new ProductNotFoundException ( id ) );
+
+        if (dto.name ( ) != null ) {
+            product.setName ( dto.name ( ).trim () );
+        }
+
+        if (dto.price ( ) != null ) {
+            product.setPrice ( dto.price ( ) );
+        }
+
+        var updated = productRepository.save ( product );
+
+        log.info ( "Product with id {} updated successfully" , id );
+
+        return productMapper.toResponseDTO ( updated );
+
+    }
+
+    public void deleteProduct(Long id) {
+
+        log.info ( "Deleting product with id {}" , id );
+
+        var product = productRepository.findById ( id ).orElseThrow ( () ->
+                new ProductNotFoundException ( id ) );
+
+        productRepository.delete ( product );
+
+        log.info ( "Product with id {} deleted successfully" , id );
+
+    }
+
+
+    }
+

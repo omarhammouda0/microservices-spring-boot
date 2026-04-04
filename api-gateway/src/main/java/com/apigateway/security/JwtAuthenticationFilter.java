@@ -22,7 +22,8 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
 
-        String path = exchange.getRequest().getURI().getPath();
+        String path = exchange
+        .getRequest().getURI().getPath();
 
 
         if (PUBLIC_PATHS.stream().anyMatch(path::startsWith)) {
@@ -48,8 +49,11 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
             return exchange.getResponse().setComplete();
         }
 
-
-        return chain.filter(exchange);
+        Long userId = jwtService.extractUserId(token);
+        ServerWebExchange modifiedExchange = exchange.mutate()
+                .request(r -> r.header("X-User-Id", String.valueOf(userId)))
+                .build();
+        return chain.filter(modifiedExchange);
     }
 
     @Override

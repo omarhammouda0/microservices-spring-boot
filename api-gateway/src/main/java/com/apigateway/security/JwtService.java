@@ -38,7 +38,11 @@ public class JwtService {
     }
 
     public String extractEmail(String token) {
-        return extractClaim(token, Claims::getSubject);
+        return extractClaim ( token, Claims::getSubject );
+    }
+
+    public Long extractUserId (String token) {
+        return extractClaim (  token, claims -> claims.get("userId", Long.class) );
     }
 
     public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
