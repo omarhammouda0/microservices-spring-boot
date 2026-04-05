@@ -7,13 +7,15 @@ import com.orderservice.dto.PlaceOrderRequestDTO;
 import com.orderservice.dto.PlaceOrderResponseDTO;
 import com.orderservice.entity.Order;
 import com.orderservice.enums.OrderStatus;
+import com.orderservice.event.OrderEventPublisher;
 import com.orderservice.exception.types.StockInsufficient;
 import com.orderservice.mapper.OrderMapper;
 import com.orderservice.repository.OrderItemRepository;
 import com.orderservice.repository.OrderRepository;
-import jakarta.transaction.Transactional;
+
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -27,6 +29,7 @@ public class OrderService {
     private final OrderItemRepository orderItemRepository;
     private final OrderMapper orderMapper;
     private final ProductServiceClient  productServiceClient;
+    private final OrderEventPublisher orderEventPublisher;
 
     public InventoryResponseDTO getInventory(Long productId) {
         return productServiceClient.getInventory
@@ -58,8 +61,6 @@ public class OrderService {
 
     public Double calculateTotalAmount(Map<OrderItemRequestDTO, InventoryResponseDTO> map) {
 
-        var totalAmount = 0.0;
-
         return map.entrySet ( )
                  .stream ( )
                  .mapToDouble ( entry -> entry.getKey ().quantity ( ) * entry.getValue ( ).price ( ))
@@ -88,7 +89,11 @@ public class OrderService {
 
         savedOrder.setItems ( savedOrderItems );
 
-        // Publish event
+        savedOrderItems.forEach (
+                item -> {
+                    orderEventPublisher.publishOrderCreated ( item , savedOrder.getId () );
+                }
+        );
 
         return orderMapper.toPlaceOrderResponseDTO ( savedOrder );
     }
