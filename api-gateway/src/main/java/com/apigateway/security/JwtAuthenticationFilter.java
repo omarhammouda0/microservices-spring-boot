@@ -5,6 +5,7 @@ import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.core.Ordered;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
@@ -50,10 +51,16 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
         }
 
         Long userId = jwtService.extractUserId(token);
-        ServerWebExchange modifiedExchange = exchange.mutate()
-                .request(r -> r.header("X-User-Id", String.valueOf(userId)))
+
+        ServerHttpRequest mutatedRequest = exchange.getRequest().mutate()
+                .header("X-User-Id", String.valueOf(userId))
                 .build();
-        return chain.filter(modifiedExchange);
+
+        ServerWebExchange mutatedExchange = exchange.mutate()
+                .request(mutatedRequest)
+                .build();
+
+        return chain.filter(mutatedExchange);
     }
 
     @Override
