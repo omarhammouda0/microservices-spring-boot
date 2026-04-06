@@ -34,11 +34,6 @@ public class ProductController {
         return "Hello from Product Service!";
     }
 
-    @GetMapping("/test")
-    public String test() {
-        String userResponse = userClient.hello ( );
-        return "Product Service says: I called User Service and got: " + userResponse;
-    }
 
     @PostMapping
     public ResponseEntity<ProductResponseDTO> createProduct(@Valid @RequestBody ProductCreateDTO dto) {
