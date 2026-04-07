@@ -23,10 +23,32 @@ public class RabbitMQConfig {
     }
 
     @Bean
+    public TopicExchange userExchange() {
+        return new TopicExchange ("user.exchange");
+    }
+
+    @Bean
+    public TopicExchange deadUserExchange() {
+        return new TopicExchange ("user.dlx");
+    }
+
+    @Bean
     public Queue orderQueue() {
         return new Queue("order.created.queue", true, false, false,
                 Map.of("x-dead-letter-exchange", "order.dlx",
                         "x-dead-letter-routing-key", "order.failed"));
+    }
+
+    @Bean
+    public Queue userQueue() {
+        return new Queue ( "user.updated.queue", true, false, false,
+                Map.of("x-dead-letter-exchange", "user.dlx",
+                        "x-dead-letter-routing-key", "user.failed") ) ;
+    }
+
+    @Bean
+    public Binding userBinding() {
+        return BindingBuilder.bind ( userQueue () ).to ( userExchange () ).with ( "user.updated" ) ;
     }
 
 
@@ -49,6 +71,17 @@ public class RabbitMQConfig {
     public Binding deadOrderBinding() {
         return BindingBuilder.bind(deadOrderQueue()).to(deadOrderExchange()).with("order.failed");
     }
+
+    @Bean
+    public Binding deadUserBinding() {
+        return BindingBuilder.bind(deadUserQueue()).to(deadUserExchange()).with("user.failed");
+    }
+
+    @Bean
+    public Queue deadUserQueue() {
+        return new Queue("user.failed.queue");
+    }
+
 
 
     @Bean

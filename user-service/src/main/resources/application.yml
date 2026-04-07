@@ -23,6 +23,11 @@ spring:
     secret: ${JWT_SECRET}
     expiration: ${JWT_EXPIRATION}
 
+  rabbitmq:
+    host: rabbitmq
+    username: ${RABBITMQ_DEFAULT_USER}
+    password: ${RABBITMQ_DEFAULT_PASS}
+
 eureka:
   client:
     register-with-eureka: true
@@ -37,7 +42,6 @@ eureka:
     lease-expiration-duration-in-seconds: 10
   server:
     wait-time-in-ms-when-sync-empty: 0
-
 
 
 management:

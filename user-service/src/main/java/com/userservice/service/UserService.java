@@ -3,6 +3,7 @@ package com.userservice.service;
 import com.userservice.dto.UserCreateDTO;
 import com.userservice.dto.UserResponseDTO;
 import com.userservice.dto.UserUpdateDTO;
+import com.userservice.event.UserEventPublisher;
 import com.userservice.exception.types.UserAlreadyDeletedException;
 import com.userservice.exception.types.UserAlreadyExistsException;
 import com.userservice.exception.types.UserNotActiveException;
@@ -25,6 +26,7 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final UserMapper userMapper;
+    private final UserEventPublisher  userEventPublisher;
 
     public UserResponseDTO createUser(UserCreateDTO createDTO) {
 
@@ -94,10 +96,12 @@ public class UserService {
         if ( updateDTO.name () != null ) {
             var newName = updateDTO.name ().trim ();
             user.setName ( newName );
+
         }
 
         var saved = userRepository.save ( user );
         log.info ( "User with email {} updated successfully" , saved.getEmail () );
+        userEventPublisher.publishUserUpdateEvent ( id );
 
         return userMapper.toUserDTO ( saved );
 

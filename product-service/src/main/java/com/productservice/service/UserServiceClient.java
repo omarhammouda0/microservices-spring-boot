@@ -9,6 +9,7 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
+
 import java.time.Duration;
 import java.time.Instant;
 
@@ -25,34 +26,34 @@ public class UserServiceClient {
     @CircuitBreaker(name = "userservice")
     @Retry(name = "userservice", fallbackMethod = "getUserByIdFallback")
 
-    public UserResponseDTO getUser (Long userId) {
+    public UserResponseDTO getUser(Long userId) {
 
-        log.info("ATTEMPT: Fetching user with id {}", userId);
+        log.info ( "ATTEMPT: Fetching user with id {}" , userId );
 
-            var cashedUser = getFromRedis ( userId );
+        var cashedUser = getFromRedis ( userId );
 
-            if ( cashedUser != null ) {
-                log.info("Cache hit — returning user {} from Redis", userId);
-                return cashedUser;
-            }
+        if (cashedUser != null) {
+            log.info ( "Cache hit — returning user {} from Redis" , userId );
+            return cashedUser;
+        }
 
 
-        UserResponseDTO user = userClient.getUserById( userId );
+        UserResponseDTO user = userClient.getUserById ( userId );
 
-            try {
-                redisTemplate.opsForValue().set(
-                        "user:" + userId,
-                        user,
-                        Duration.ofMinutes(10)
-                );
-                log.info("Cached user {} in Redis", userId);
+        try {
+            redisTemplate.opsForValue ( ).set (
+                    "user:" + userId ,
+                    user ,
+                    Duration.ofMinutes ( 10 )
+            );
+            log.info ( "Cached user {} in Redis" , userId );
 
-            } catch (Exception e) {
-                log.warn ("Error in cached user {} in Redis", userId, e);
+        } catch (Exception e) {
+            log.warn ( "Error in cached user {} in Redis" , userId , e );
 
-            }
+        }
 
-            return user;
+        return user;
 
     }
 
