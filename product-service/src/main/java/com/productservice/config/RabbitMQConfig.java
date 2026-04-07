@@ -29,6 +29,7 @@ public class RabbitMQConfig {
                         "x-dead-letter-routing-key", "order.failed"));
     }
 
+
     @Bean
     public Binding orderBinding() {
         return BindingBuilder.bind(orderQueue()).to(orderExchange()).with("order.created");
