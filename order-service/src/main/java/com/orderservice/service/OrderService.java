@@ -5,12 +5,14 @@ import com.orderservice.dto.*;
 import com.orderservice.entity.Order;
 import com.orderservice.enums.OrderStatus;
 import com.orderservice.event.OrderEventPublisher;
+import com.orderservice.exception.types.InvalidStatusTransition;
 import com.orderservice.exception.types.OrderNotFoundException;
 import com.orderservice.exception.types.StockInsufficient;
 import com.orderservice.mapper.OrderMapper;
 import com.orderservice.repository.OrderItemRepository;
 import com.orderservice.repository.OrderRepository;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -20,7 +22,7 @@ import java.util.Map;
 
 
 @AllArgsConstructor
-
+@Slf4j
 @Service
 public class OrderService {
 
@@ -131,6 +133,27 @@ public class OrderService {
 
     }
 
+    @Transactional
+    public OrderResponseDTO orderCancel (Long orderId  , Long userId) {
+
+        var order = orderRepository.findById ( orderId ).orElseThrow (
+                ()-> new OrderNotFoundException ( orderId )
+        );
+
+        helperService.checkUserIdentity ( order.getUserId () , userId );
+
+        var orderStatus = order.getStatus ();
+
+        if (orderStatus != OrderStatus.PENDING && orderStatus != OrderStatus.CONFIRMED) {
+            throw new InvalidStatusTransition ( orderStatus , OrderStatus.CANCELLED );
+        }
+
+        order.setStatus ( OrderStatus.CANCELLED );
+        orderRepository.save ( order );
+        orderEventPublisher.publishOrderCancelled ( orderId , order.getItems () );
+
+        return orderMapper.toOrderResponseDto ( order );
+    }
 
 }
 

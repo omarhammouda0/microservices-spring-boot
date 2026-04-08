@@ -1,5 +1,7 @@
 package com.productservice.event;
 
+import com.productservice.dto.OrderCancelledEvent;
+import com.productservice.entity.Inventory;
 import com.productservice.entity.ProcessedEvent;
 import com.productservice.exception.types.InSufficentStockLevel;
 import com.productservice.exception.types.InventoryNotFoundException;
@@ -12,6 +14,7 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import java.time.Instant;
+import java.util.Map;
 
 @AllArgsConstructor
 @Component
@@ -38,6 +41,7 @@ public class OrderEventConsumer {
         var productId = orderCreatedEvent.productId () ;
         var itemInventory =  inventoryRepository.findByProductId ( orderCreatedEvent.productId () )
                 .orElseThrow (  () -> new InventoryNotFoundException (orderCreatedEvent.productId () ) );
+
         var currentQuantity = itemInventory.getQuantity () ;
         var itemQuantity = orderCreatedEvent.quantity () ;
 
@@ -59,5 +63,40 @@ public class OrderEventConsumer {
         productEventPublisher.publishOrderConfirmed ( orderId );
 
     }
+
+    @RabbitListener(queues = "order.cancelled.queue")
+    @Transactional
+    public void handleOrderCancelled(OrderCancelledEvent orderCancelledEvent) {
+
+        boolean isEventAlreadyProcessed = processedEventRepository.existsById ( orderCancelledEvent.eventId ( ) );
+
+        if (isEventAlreadyProcessed) {
+            log.warn ( "The event for this order has been already processed" );
+            return;
+        }
+
+        orderCancelledEvent.items ( ).forEach ( item -> {
+            var inventory = inventoryRepository.findByProductId ( item.productId ( ) )
+                    .orElseThrow ( () -> new InventoryNotFoundException ( item.productId ( ) ) );
+
+            int newQuantity = inventory.getQuantity ( ) + item.quantity ( );
+            inventory.setQuantity ( newQuantity );
+            inventoryRepository.save ( inventory );
+            log.info ( "Restored {} units of product {}. New quantity: {}" ,
+                    item.quantity ( ) , item.productId ( ) , newQuantity );
+        } );
+
+
+        var event = ProcessedEvent.builder ( )
+                .id ( orderCancelledEvent.eventId ( ) )
+                .timestamp ( Instant.now ( ) )
+                .build ( );
+
+        processedEventRepository.save ( event );
+        log.info("Successfully processed cancellation for order: {}", orderCancelledEvent.orderId ());
+
+    }
+
+
 
 }

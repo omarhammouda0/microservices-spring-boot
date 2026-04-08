@@ -65,19 +65,23 @@ public class OrderMapper {
             Order order) {
 
         return itemDTOs.stream()
+
                 .map(itemDTO -> {
                     InventoryResponseDTO inventory = inventoryMap.get(itemDTO);
                     return toOrderItem(itemDTO, inventory, order);
                 })
+
                 .collect( Collectors.toList());
     }
 
     public PlaceOrderResponseDTO toPlaceOrderResponseDTO(Order order) {
         return new PlaceOrderResponseDTO(
+
                 order.getId(),
                 order.getStatus(),
                 order.getCreatedAt(),
                 order.getTotalAmount()
+
         );
     }
 }

@@ -46,6 +46,7 @@ public class RabbitMQConfig {
                         "x-dead-letter-routing-key", "user.failed") ) ;
     }
 
+
     @Bean
     public Binding userBinding() {
         return BindingBuilder.bind ( userQueue () ).to ( userExchange () ).with ( "user.updated" ) ;

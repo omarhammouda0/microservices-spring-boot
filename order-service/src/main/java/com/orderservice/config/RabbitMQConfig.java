@@ -40,6 +40,18 @@ public class RabbitMQConfig {
     }
 
     @Bean
+    public Queue orderCancelledQueue() {
+        return new Queue("order.cancelled.queue", true, false, false,
+                Map.of("x-dead-letter-exchange", "order.dlx",
+                        "x-dead-letter-routing-key", "order.failed"));
+    }
+
+    @Bean
+    public Binding orderCancelledBinding() {
+        return BindingBuilder.bind(orderCancelledQueue()).to(orderExchange()).with("order.cancelled");
+    }
+
+    @Bean
     public Jackson2JsonMessageConverter messageConverter() {
         return new Jackson2JsonMessageConverter();
     }
