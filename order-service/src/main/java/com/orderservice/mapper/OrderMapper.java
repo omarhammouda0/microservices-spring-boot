@@ -1,9 +1,6 @@
 package com.orderservice.mapper;
 
-import com.orderservice.dto.InventoryResponseDTO;
-import com.orderservice.dto.OrderItemRequestDTO;
-import com.orderservice.dto.PlaceOrderRequestDTO;
-import com.orderservice.dto.PlaceOrderResponseDTO;
+import com.orderservice.dto.*;
 import com.orderservice.entity.Order;
 import com.orderservice.entity.OrderItem;
 import com.orderservice.enums.OrderStatus;
@@ -24,6 +21,25 @@ public class OrderMapper {
                 .build();
     }
 
+    public OrderResponseDTO toOrderResponseDto (Order order) {
+
+        return new OrderResponseDTO(
+                order.getId () ,
+                order.getUserId (),
+
+                order.getItems ()
+                        .stream ()
+                        .map ( this::toOrderItemResponseDto )
+                        .toList ( ) ,
+
+                order.getStatus (),
+                order.getTotalAmount (),
+                order.getCreatedAt (),
+                order.getUpdatedAt ()
+        );
+
+    }
+
     public OrderItem toOrderItem(OrderItemRequestDTO itemDTO, InventoryResponseDTO inventory, Order order) {
         OrderItem orderItem = new OrderItem();
         orderItem.setProductId(itemDTO.productId());
@@ -31,6 +47,16 @@ public class OrderMapper {
         orderItem.setItemPrice(inventory.price());
         orderItem.setOrder(order);
         return orderItem;
+    }
+
+    public OrderItemResponseDTO toOrderItemResponseDto(OrderItem orderItem) {
+        return new OrderItemResponseDTO(
+                orderItem.getId (),
+                orderItem.getProductId (),
+                orderItem.getQuantity (),
+                orderItem.getItemPrice (),
+                orderItem.getCreatedAt ()
+        );
     }
 
     public List<OrderItem> toOrderItemList(

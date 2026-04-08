@@ -1,24 +1,23 @@
 package com.orderservice.service;
 
 import com.orderservice.client.ProductServiceClient;
-import com.orderservice.dto.InventoryResponseDTO;
-import com.orderservice.dto.OrderItemRequestDTO;
-import com.orderservice.dto.PlaceOrderRequestDTO;
-import com.orderservice.dto.PlaceOrderResponseDTO;
+import com.orderservice.dto.*;
 import com.orderservice.entity.Order;
 import com.orderservice.enums.OrderStatus;
 import com.orderservice.event.OrderEventPublisher;
+import com.orderservice.exception.types.OrderNotFoundException;
 import com.orderservice.exception.types.StockInsufficient;
 import com.orderservice.mapper.OrderMapper;
 import com.orderservice.repository.OrderItemRepository;
 import com.orderservice.repository.OrderRepository;
-
 import lombok.AllArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.util.HashMap;
 import java.util.Map;
+
 
 @AllArgsConstructor
 
@@ -30,6 +29,7 @@ public class OrderService {
     private final OrderMapper orderMapper;
     private final ProductServiceClient  productServiceClient;
     private final OrderEventPublisher orderEventPublisher;
+    private final HelperService helperService;
 
     public InventoryResponseDTO getInventory(Long productId) {
         return productServiceClient.getInventory
@@ -69,7 +69,10 @@ public class OrderService {
     }
 
     @Transactional
-    public PlaceOrderResponseDTO placeOrder(PlaceOrderRequestDTO placeOrderRequestDTO , Long userId) {
+    public PlaceOrderResponseDTO placeOrder(PlaceOrderRequestDTO placeOrderRequestDTO ,
+                                            Long userId , String userRole) {
+
+        helperService.checkUserRole ( "USER", userRole );
 
         var check = stockCheck ( placeOrderRequestDTO );
         var totalAmount = calculateTotalAmount ( check );
@@ -98,6 +101,39 @@ public class OrderService {
         return orderMapper.toPlaceOrderResponseDTO ( savedOrder );
     }
 
+    @Transactional(readOnly = true)
+    public OrderResponseDTO getOrder (Long orderId , Long userId) {
+
+        var order = orderRepository.findById ( orderId ).orElseThrow (
+                () -> new OrderNotFoundException ( orderId )
+        );
+
+        helperService.checkUserIdentity ( order.getUserId () , userId );
+
+        return orderMapper.toOrderResponseDto ( order );
+    }
+
+    @Transactional(readOnly = true)
+    public Page<OrderResponseDTO> getOrders (Pageable pageable , String userRole ) {
+
+        helperService.checkIfAdmin ( userRole );
+
+        return orderRepository.findAll ( pageable)
+                .map ( orderMapper::toOrderResponseDto );
+    }
+
+    @Transactional(readOnly = true)
+    public Page<OrderResponseDTO> getOrdersByUser(Long userId , Pageable pageable  ) {
+
+
+        return orderRepository.getAllOrdersForUser ( userId , pageable  )
+                .map ( orderMapper::toOrderResponseDto );
+
+    }
+
+
 }
+
+
 
 

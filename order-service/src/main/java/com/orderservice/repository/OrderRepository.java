@@ -14,6 +14,8 @@ public interface OrderRepository extends JpaRepository<Order,Long> {
 
     @Query ("select o from Order o where o.userId= :user_id")
     Page <Order> getAllOrdersForUser (@Param ( "user_id" ) Long userId ,
-                                      Pageable pageable);
+                                      Pageable pageable );
+
+
 
 }

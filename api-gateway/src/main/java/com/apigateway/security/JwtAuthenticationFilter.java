@@ -1,6 +1,7 @@
 package com.apigateway.security;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.core.Ordered;
@@ -14,6 +15,7 @@ import java.util.List;
 
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
 
     private final JwtService jwtService;
@@ -51,9 +53,12 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
         }
 
         Long userId = jwtService.extractUserId(token);
+        String userRole = jwtService.extractUserRole(token);
+        log.info("Extracted role: {}", userRole);
 
         ServerHttpRequest mutatedRequest = exchange.getRequest().mutate()
                 .header("X-User-Id", String.valueOf(userId))
+                .header("X-User-Role", userRole)
                 .build();
 
         ServerWebExchange mutatedExchange = exchange.mutate()
