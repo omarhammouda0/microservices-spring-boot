@@ -34,6 +34,9 @@ public class Product {
     @Column (name = "created_by" , nullable = false)
     private Long userId;
 
+    @Column (name = "is_active" , nullable = false)
+    private Boolean isActive = true;
+
     @CreatedDate
     @Column(name = "created_date" , updatable = false)
     private Instant createdDate;

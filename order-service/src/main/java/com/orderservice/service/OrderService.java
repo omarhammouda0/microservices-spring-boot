@@ -2,6 +2,7 @@ package com.orderservice.service;
 
 import com.orderservice.client.ProductServiceClient;
 import com.orderservice.dto.*;
+import com.productservice.dto.*;
 import com.orderservice.entity.Order;
 import com.orderservice.enums.OrderStatus;
 import com.orderservice.event.OrderEventPublisher;

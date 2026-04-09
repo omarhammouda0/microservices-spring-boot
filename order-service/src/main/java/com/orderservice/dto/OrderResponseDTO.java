@@ -1,6 +1,5 @@
 package com.orderservice.dto;
 
-import com.orderservice.entity.OrderItem;
 import com.orderservice.enums.OrderStatus;
 import java.time.Instant;
 import java.util.List;

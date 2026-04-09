@@ -15,4 +15,8 @@ public interface ProductRepository extends JpaRepository <Product, Long> {
 
     @Query ( "SELECT p FROM Product p WHERE p.userId = :user_id" )
     List <Product> findByUserId(@Param ( "user_id" ) Long userId);
+
+    @Query("select p from Product p where p.isActive = true")
+    List<Product> getAllActiveProducts();
 }
+

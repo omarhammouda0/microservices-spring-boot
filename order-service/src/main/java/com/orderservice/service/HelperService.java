@@ -5,8 +5,6 @@ import com.orderservice.exception.types.InvalidStatusTransition;
 import com.orderservice.exception.types.NotAuthorizedException;
 import org.springframework.stereotype.Component;
 
-import java.util.Objects;
-
 @Component
 public class HelperService {
 

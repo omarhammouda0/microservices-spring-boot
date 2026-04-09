@@ -1,8 +1,6 @@
 package com.orderservice.exception.ErrorCode;
 
 
-import com.fasterxml.jackson.annotation.JsonSubTypes;
-
 public enum ErrorCode {
 
 
