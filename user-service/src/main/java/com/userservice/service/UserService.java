@@ -13,8 +13,10 @@ import com.userservice.repository.UserRepository;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -27,28 +29,38 @@ public class UserService {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
     private final UserEventPublisher  userEventPublisher;
+    private final HelperService helperService;
 
-    public UserResponseDTO createUser(UserCreateDTO createDTO) {
+    @Transactional
+    public UserResponseDTO createUser(UserCreateDTO createDTO , String userRole) {
 
-        String email = createDTO.email ();
+        helperService.checkIfAdmin ( userRole );
 
-        if (userRepository.existsByEmailIgnoreCase(email))
+        String email = createDTO.email ( );
+
+        if (userRepository.existsByEmailIgnoreCase ( email ))
 
             throw new UserAlreadyExistsException ( email );
 
-        var toSave = userMapper.toUser (  createDTO );
+        var toSave = userMapper.toUser ( createDTO );
         var saved = userRepository.save ( toSave );
 
-        log.info (  "User with email {} created successfully" , email );
+        log.info ( "User with email {} created successfully" , email );
 
-        return userMapper.toUserDTO (  saved );
+        return userMapper.toUserDTO ( saved );
 
     }
 
-    public UserResponseDTO getUserById(Long id) {
+    @Transactional(readOnly = true)
+    public UserResponseDTO getUserById(Long id , Long currentUserId , String userRole) {
 
         var user = userRepository.findById ( id ).orElseThrow ( () ->
                 new UserNotFoundException ( id ) );
+
+
+        if (! Objects.equals ( currentUserId , user.getId ( ) )   ) {
+            helperService.checkIfAdmin ( userRole );
+        }
 
         if ( ! user.getIsActive ())
             throw new UserNotActiveException ( id );
@@ -57,7 +69,10 @@ public class UserService {
 
     }
 
-    public List<UserResponseDTO> getAllUsers() {
+    @Transactional(readOnly = true)
+    public List<UserResponseDTO> getAllUsers(String userRole) {
+
+        helperService.checkIfAdmin ( userRole );
 
         return userRepository.findAll ( )
                 .stream ( )
@@ -65,7 +80,10 @@ public class UserService {
                 .collect ( Collectors.toList ( ) );
     }
 
-    public List<UserResponseDTO> getActiveUsers() {
+    @Transactional (readOnly = true)
+    public List<UserResponseDTO> getActiveUsers(String userRole ) {
+
+        helperService.checkIfAdmin ( userRole );
 
         return userRepository.getActiveUsers ()
 
@@ -75,13 +93,19 @@ public class UserService {
 
     }
 
-    public UserResponseDTO updateUser(Long id, UserUpdateDTO updateDTO) {
+    @Transactional
+    public UserResponseDTO updateUser(Long id, UserUpdateDTO updateDTO , String userRole , Long currentUserId) {
 
         if (updateDTO.email () == null && updateDTO.name () == null  )
             throw new IllegalStateException ( "Should add at least one new value" );
 
         var user = userRepository.findById ( id ).orElseThrow ( () ->
                 new UserNotFoundException ( id ) );
+
+
+        if (! Objects.equals ( currentUserId , user.getId ( ) )   ) {
+            helperService.checkIfAdmin ( userRole );
+        }
 
         if (updateDTO.email () != null) {
             var newEmail = updateDTO.email ().trim ();
@@ -107,10 +131,15 @@ public class UserService {
 
     }
 
-    public void deleteUser(Long id) {
+    @Transactional
+    public void deleteUser(Long id , String userRole , Long currentUserId) {
 
         var user = userRepository.findById ( id )
                 .orElseThrow ( () -> new UserNotFoundException ( id ) );
+
+        if (! Objects.equals ( currentUserId , user.getId ( ) )   ) {
+            helperService.checkIfAdmin ( userRole );
+        }
 
         if (! user.getIsActive () )
             throw new UserAlreadyDeletedException ( id );
