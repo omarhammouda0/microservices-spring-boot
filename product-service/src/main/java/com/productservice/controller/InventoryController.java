@@ -1,16 +1,19 @@
 package com.productservice.controller;
 
 import com.productservice.dto.InventoryResponseDTO;
+import com.productservice.dto.InventoryUpdateDTO;
 import com.productservice.service.InventoryService;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
+@Slf4j
 @Validated
 @AllArgsConstructor
 
@@ -26,4 +29,31 @@ public class InventoryController {
         return ResponseEntity.ok (inventoryService.getInventoryByProductId ( productId ) );
 
     }
+
+    @GetMapping
+    public ResponseEntity<List<InventoryResponseDTO>> getAllInventory(
+            @RequestHeader("X-User-Role") String userRole
+    ) {
+        log.info("Fetching all inventory by user with role: {}", userRole);
+        return ResponseEntity.ok ( inventoryService.getAllInventory ( userRole ) );
+
+    }
+
+    @PutMapping("/{productId}")
+    public ResponseEntity<InventoryResponseDTO> updateInventory(
+            @Positive(message = "Product ID must be positive")
+            @PathVariable Long productId,
+            @RequestHeader("X-User-Role") String userRole ,
+            @Valid @RequestBody InventoryUpdateDTO updateDTO) {
+
+        log.info("Updating inventory for product: {} to quantity: {}", productId, updateDTO.quantity());
+
+        InventoryResponseDTO updatedInventory = inventoryService.updateInventory
+                (productId, updateDTO.quantity() , userRole);
+
+        return ResponseEntity.ok(updatedInventory);
+    }
+
+
+
 }

@@ -54,6 +54,7 @@ public class UserServiceClientTest {
                 "Test product" ,
                 19.99 ,
                 1L ,
+                true ,
                 Instant.now ()
         );
 

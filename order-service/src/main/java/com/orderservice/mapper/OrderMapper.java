@@ -1,7 +1,6 @@
 package com.orderservice.mapper;
 
 import com.orderservice.dto.*;
-import com.productservice.dto.*;
 import com.orderservice.entity.Order;
 import com.orderservice.entity.OrderItem;
 import com.orderservice.enums.OrderStatus;

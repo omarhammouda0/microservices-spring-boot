@@ -35,6 +35,7 @@ public class Product {
     private Long userId;
 
     @Column (name = "is_active" , nullable = false)
+    @Builder.Default
     private Boolean isActive = true;
 
     @CreatedDate
