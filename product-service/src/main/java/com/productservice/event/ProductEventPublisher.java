@@ -20,13 +20,9 @@ public class ProductEventPublisher {
     public void publishOrderConfirmed(Long orderId) {
 
         log.info ( "Order with id {} has been confirmed" , orderId );
-
         var orderConfirmation = new OrderConfirmedEvent ( UUID.randomUUID ( ) , orderId );
-
         rabbitTemplate.convertAndSend ( "order.exchange" , "order.confirmed" , orderConfirmation );
 
     }
-
-
 
 }

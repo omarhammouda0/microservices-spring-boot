@@ -5,12 +5,14 @@ import org.springframework.amqp.core.Binding;
 import org.springframework.amqp.core.BindingBuilder;
 import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.core.TopicExchange;
+import org.springframework.amqp.rabbit.config.RetryInterceptorBuilder;
 import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFactory;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.retry.interceptor.RetryOperationsInterceptor;
 
 import java.util.Map;
 
@@ -21,6 +23,7 @@ public class RabbitMQConfig {
     public TopicExchange orderExchange() {
         return new TopicExchange ("order.exchange");
     }
+
 
     @Bean
     public Queue deadOrderQueue() {
@@ -65,6 +68,13 @@ public class RabbitMQConfig {
         factory.setConnectionFactory(connectionFactory);
         factory.setMessageConverter(messageConverter);
         factory.setDefaultRequeueRejected(false);
+        RetryOperationsInterceptor retryInterceptor = RetryInterceptorBuilder.stateless ( )
+                .maxAttempts ( 5 )
+                .backOffOptions ( 500 , 2.0 , 10000 )
+                .build ( );
+
+        factory.setAdviceChain ( retryInterceptor );
+
         return factory;
     }
 

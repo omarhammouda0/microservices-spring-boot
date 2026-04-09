@@ -1,4 +1,4 @@
-package com.productservice.dto;
+package com.productservice.event;
 
 import java.util.List;
 import java.util.UUID;

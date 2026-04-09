@@ -29,7 +29,7 @@ public class OrderService {
     private final OrderRepository orderRepository;
     private final OrderItemRepository orderItemRepository;
     private final OrderMapper orderMapper;
-    private final ProductServiceClient  productServiceClient;
+    private final ProductServiceClient productServiceClient;
     private final OrderEventPublisher orderEventPublisher;
     private final HelperService helperService;
 
@@ -64,9 +64,9 @@ public class OrderService {
     public Double calculateTotalAmount(Map<OrderItemRequestDTO, InventoryResponseDTO> map) {
 
         return map.entrySet ( )
-                 .stream ( )
-                 .mapToDouble ( entry -> entry.getKey ().quantity ( ) * entry.getValue ( ).price ( ))
-                 .sum ();
+                .stream ( )
+                .mapToDouble ( entry -> entry.getKey ( ).quantity ( ) * entry.getValue ( ).price ( ) )
+                .sum ( );
 
     }
 
@@ -74,7 +74,7 @@ public class OrderService {
     public PlaceOrderResponseDTO placeOrder(PlaceOrderRequestDTO placeOrderRequestDTO ,
                                             Long userId , String userRole) {
 
-        helperService.checkUserRole ( "USER", userRole );
+        helperService.checkUserRole ( "USER" , userRole );
 
         var check = stockCheck ( placeOrderRequestDTO );
         var totalAmount = calculateTotalAmount ( check );
@@ -96,7 +96,7 @@ public class OrderService {
 
         savedOrderItems.forEach (
                 item -> {
-                    orderEventPublisher.publishOrderCreated ( item , savedOrder.getId () );
+                    orderEventPublisher.publishOrderCreated ( item , savedOrder.getId ( ) );
                 }
         );
 
@@ -104,45 +104,45 @@ public class OrderService {
     }
 
     @Transactional(readOnly = true)
-    public OrderResponseDTO getOrder (Long orderId , Long userId) {
+    public OrderResponseDTO getOrder(Long orderId , Long userId) {
 
         var order = orderRepository.findById ( orderId ).orElseThrow (
                 () -> new OrderNotFoundException ( orderId )
         );
 
-        helperService.checkUserIdentity ( order.getUserId () , userId );
+        helperService.checkUserIdentity ( order.getUserId ( ) , userId );
 
         return orderMapper.toOrderResponseDto ( order );
     }
 
     @Transactional(readOnly = true)
-    public Page<OrderResponseDTO> getOrders (Pageable pageable , String userRole ) {
+    public Page<OrderResponseDTO> getOrders(Pageable pageable , String userRole) {
 
         helperService.checkIfAdmin ( userRole );
 
-        return orderRepository.findAll ( pageable)
+        return orderRepository.findAll ( pageable )
                 .map ( orderMapper::toOrderResponseDto );
     }
 
     @Transactional(readOnly = true)
-    public Page<OrderResponseDTO> getOrdersByUser(Long userId , Pageable pageable  ) {
+    public Page<OrderResponseDTO> getOrdersByUser(Long userId , Pageable pageable) {
 
 
-        return orderRepository.getAllOrdersForUser ( userId , pageable  )
+        return orderRepository.getAllOrdersForUser ( userId , pageable )
                 .map ( orderMapper::toOrderResponseDto );
 
     }
 
     @Transactional
-    public OrderResponseDTO orderCancel (Long orderId  , Long userId) {
+    public OrderResponseDTO orderCancel(Long orderId , Long userId) {
 
         var order = orderRepository.findById ( orderId ).orElseThrow (
-                ()-> new OrderNotFoundException ( orderId )
+                () -> new OrderNotFoundException ( orderId )
         );
 
-        helperService.checkUserIdentity ( order.getUserId () , userId );
+        helperService.checkUserIdentity ( order.getUserId ( ) , userId );
 
-        var orderStatus = order.getStatus ();
+        var orderStatus = order.getStatus ( );
 
         if (orderStatus != OrderStatus.PENDING && orderStatus != OrderStatus.CONFIRMED) {
             throw new InvalidStatusTransition ( orderStatus , OrderStatus.CANCELLED );
@@ -150,13 +150,46 @@ public class OrderService {
 
         order.setStatus ( OrderStatus.CANCELLED );
         orderRepository.save ( order );
-        orderEventPublisher.publishOrderCancelled ( orderId , order.getItems () );
+        orderEventPublisher.publishOrderCancelled ( orderId , order.getItems ( ) );
 
         return orderMapper.toOrderResponseDto ( order );
     }
+
+    @Transactional
+    public OrderResponseDTO updateOrderStatus(Long orderId , OrderStatus newOrderStatus , String currentUserRole) {
+
+        var order = orderRepository.findById ( orderId ).orElseThrow (
+                () -> new OrderNotFoundException ( orderId )
+        );
+
+        helperService.checkIfAdmin ( currentUserRole );
+        var oldStatus = order.getStatus ( );
+
+        helperService.checkAdminStatusTransition ( newOrderStatus , oldStatus );
+
+        order.setStatus ( newOrderStatus );
+        log.info ( "Order status for order {} changed to {}", orderId , newOrderStatus );
+
+        orderRepository.save ( order );
+
+        return orderMapper.toOrderResponseDto ( order );
+
+    }
+
+
+
 
 }
 
 
 
 
+
+//Good — finish Order Service CRUD first.
+//Looking at the agenda, Order Service still needs:
+//
+//PUT /orders/{id}/status — update status, ADMIN only
+//Status machine validation on REST endpoints — 409 on invalid transition
+//
+//Before writing — what statuses should ADMIN be able to set via this endpoint? Think about which transitions make sense from
+//an admin perspective that a user can't do themselves.

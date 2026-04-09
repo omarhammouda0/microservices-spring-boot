@@ -3,6 +3,7 @@ package com.orderservice.controller;
 import com.orderservice.dto.OrderResponseDTO;
 import com.orderservice.dto.PlaceOrderRequestDTO;
 import com.orderservice.dto.PlaceOrderResponseDTO;
+import com.orderservice.enums.OrderStatus;
 import com.orderservice.service.OrderService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
@@ -66,6 +67,18 @@ public class OrderController {
 
 
         return ResponseEntity.ok(orderService.getOrdersByUser(requestingUserId, pageable  ));
+    }
+
+    @PutMapping("/{orderId}/status")
+
+    public ResponseEntity<OrderResponseDTO> updateOrderStatusForAdmin(
+
+            @PathVariable Long orderId,
+            @RequestBody OrderStatus newOrderStatus ,
+            @RequestHeader("X-User-Role") String userRole)
+    {
+
+        return ResponseEntity.ok(orderService.updateOrderStatus ( orderId , newOrderStatus , userRole));
     }
 
     @DeleteMapping("/{orderId}")

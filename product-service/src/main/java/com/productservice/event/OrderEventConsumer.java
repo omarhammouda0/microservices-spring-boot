@@ -1,7 +1,5 @@
 package com.productservice.event;
 
-import com.productservice.dto.OrderCancelledEvent;
-import com.productservice.entity.Inventory;
 import com.productservice.entity.ProcessedEvent;
 import com.productservice.exception.types.InSufficentStockLevel;
 import com.productservice.exception.types.InventoryNotFoundException;
@@ -10,11 +8,9 @@ import com.productservice.repository.ProcessedEventRepository;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import java.time.Instant;
-import java.util.Map;
 
 @AllArgsConstructor
 @Component

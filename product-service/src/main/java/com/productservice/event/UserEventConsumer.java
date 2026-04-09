@@ -16,7 +16,7 @@ public class UserEventConsumer {
 
     @RabbitListener(queues = "user.updated.queue")
 
-    public void handleUserUpdate (UserUpdatedEvent userUpdatedEvent) {
+    public void handleUserUpdate(UserUpdatedEvent userUpdatedEvent) {
 
         var userId = userUpdatedEvent.userId ( );
 
