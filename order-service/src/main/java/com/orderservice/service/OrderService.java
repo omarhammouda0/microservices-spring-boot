@@ -178,18 +178,7 @@ public class OrderService {
 
 
 
-
 }
 
 
 
-
-
-//Good — finish Order Service CRUD first.
-//Looking at the agenda, Order Service still needs:
-//
-//PUT /orders/{id}/status — update status, ADMIN only
-//Status machine validation on REST endpoints — 409 on invalid transition
-//
-//Before writing — what statuses should ADMIN be able to set via this endpoint? Think about which transitions make sense from
-//an admin perspective that a user can't do themselves.
