@@ -61,12 +61,12 @@ public class OrderController {
 
     @GetMapping("/my")
     public ResponseEntity<Page<OrderResponseDTO>> getOrdersByUser(
-
             @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable,
-            @RequestHeader("X-User-Id") Long requestingUserId) {
+            @RequestHeader("X-User-Id") Long requestingUserId,
+            @RequestHeader("X-User-Role") String userRole) {
 
 
-        return ResponseEntity.ok(orderService.getOrdersByUser(requestingUserId, pageable  ));
+        return ResponseEntity.ok(orderService.getOrdersByUser(requestingUserId, pageable, requestingUserId, userRole));
     }
 
     @PutMapping("/{orderId}/status")

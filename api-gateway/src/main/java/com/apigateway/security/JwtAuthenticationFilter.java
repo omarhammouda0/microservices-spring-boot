@@ -57,6 +57,10 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
         log.info("Extracted role: {}", userRole);
 
         ServerHttpRequest mutatedRequest = exchange.getRequest().mutate()
+                .headers ( h -> {
+                    h.remove ( "X-User_Id" );
+                    h.remove("X-User-Role");
+                } )
                 .header("X-User-Id", String.valueOf(userId))
                 .header("X-User-Role", userRole)
                 .build();

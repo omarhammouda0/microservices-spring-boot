@@ -147,6 +147,7 @@ public class UserService {
         user.setIsActive (  false );
         userRepository.save ( user );
 
+        userEventPublisher.publishUserUpdateEvent ( id );
         log.info ( "User with email {} deleted successfully" , user.getEmail () );
 
     }

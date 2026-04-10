@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 
 @AllArgsConstructor
@@ -74,7 +75,6 @@ public class OrderService {
     public PlaceOrderResponseDTO placeOrder(PlaceOrderRequestDTO placeOrderRequestDTO ,
                                             Long userId , String userRole) {
 
-        helperService.checkUserRole ( "USER" , userRole );
 
         var check = stockCheck ( placeOrderRequestDTO );
         var totalAmount = calculateTotalAmount ( check );
@@ -87,6 +87,8 @@ public class OrderService {
                 .status ( OrderStatus.PENDING )
 
                 .build ( );
+
+        helperService.checkUserIdentity ( order.getUserId () , userId );
 
         var savedOrder = orderRepository.save ( order );
         var savedOrderItems = orderItemRepository.saveAll
@@ -125,8 +127,12 @@ public class OrderService {
     }
 
     @Transactional(readOnly = true)
-    public Page<OrderResponseDTO> getOrdersByUser(Long userId , Pageable pageable) {
+    public Page<OrderResponseDTO> getOrdersByUser
+            (Long userId , Pageable pageable , Long requestingUserId , String userRole) {
 
+        if (! Objects.equals ( requestingUserId , userId )   ) {
+            helperService.checkIfAdmin ( userRole );
+        }
 
         return orderRepository.getAllOrdersForUser ( userId , pageable )
                 .map ( orderMapper::toOrderResponseDto );
@@ -157,6 +163,7 @@ public class OrderService {
 
     @Transactional
     public OrderResponseDTO updateOrderStatus(Long orderId , OrderStatus newOrderStatus , String currentUserRole) {
+
 
         var order = orderRepository.findById ( orderId ).orElseThrow (
                 () -> new OrderNotFoundException ( orderId )
