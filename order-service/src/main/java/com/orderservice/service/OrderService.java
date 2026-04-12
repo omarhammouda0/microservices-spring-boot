@@ -33,7 +33,7 @@ public class OrderService {
     private final HelperService helperService;
     private final ProductServiceClient productServiceClient;
 
-    public InventoryResponseDTO getInventory(Long productId) {
+    public InventoryResponseDTO getInventory(Long productId){
         return productServiceClient.getInventoryByProductId ( productId );
 
     }

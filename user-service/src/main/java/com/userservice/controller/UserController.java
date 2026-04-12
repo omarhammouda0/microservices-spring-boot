@@ -32,6 +32,7 @@ public class UserController {
         return ResponseEntity.status ( HttpStatus.CREATED ).body ( userService.createUser ( user , userRole ) );
     }
 
+
     @GetMapping("/{id}")
     public ResponseEntity<UserResponseDTO> getUserById
             (@PathVariable @Positive Long id ,

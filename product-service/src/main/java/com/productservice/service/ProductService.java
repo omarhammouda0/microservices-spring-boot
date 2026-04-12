@@ -36,7 +36,7 @@ public class ProductService {
 
         helperService.checkIfAdmin ( userRole );
 
-        if (!"Service Unavailable".equals(user.name()) && !user.active()) {
+        if (!UserServiceClient.FALLBACK_USER_NAME.equals(user.name()) && !user.active()) {
             throw new UserNotActiveException(dto.userId());
         }
 
@@ -65,7 +65,7 @@ public class ProductService {
 
         UserResponseDTO user =  userServiceClient.getUser ( product.getUserId ( ) );
 
-        if (!"Service Unavailable".equals(user.name()) && !user.active()) {
+        if (!UserServiceClient.FALLBACK_USER_NAME.equals(user.name()) && !user.active()) {
             throw new UserNotActiveException(product.getUserId());
         }
 

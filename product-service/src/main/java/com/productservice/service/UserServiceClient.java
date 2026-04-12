@@ -23,6 +23,8 @@ public class UserServiceClient {
     private final UserClient userClient;
     private final RedisTemplate<String, UserResponseDTO> redisTemplate;
 
+    public static final String FALLBACK_USER_NAME = "Service Unavailable";
+
     @CircuitBreaker(name = "userservice")
     @Retry(name = "userservice", fallbackMethod = "getUserByIdFallback")
 
@@ -57,7 +59,7 @@ public class UserServiceClient {
 
     }
 
-    private UserResponseDTO getFromRedis(Long userId) {
+    public UserResponseDTO getFromRedis(Long userId) {
 
         try {
             return redisTemplate.opsForValue ( ).get ( "user:" + userId );
@@ -71,7 +73,7 @@ public class UserServiceClient {
 
     }
 
-    UserResponseDTO getUserByIdFallback(Long userId , Throwable ex) {
+    public UserResponseDTO getUserByIdFallback(Long userId , Throwable ex) {
 
         if (ex instanceof CallNotPermittedException) {
             log.warn ( "Circuit is OPEN for user {}. Trying cache..." , userId );
@@ -91,7 +93,7 @@ public class UserServiceClient {
 
         return new UserResponseDTO (
                 userId ,
-                "Service Unavailable" ,
+                FALLBACK_USER_NAME ,
                 "[unavailable@system.com]" ,
                 Instant.now ( ) ,
                 false

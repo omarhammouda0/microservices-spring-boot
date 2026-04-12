@@ -153,4 +153,15 @@ public class UserService {
     }
 
 
+    @Transactional(readOnly = true)
+    public UserResponseDTO getInternalUserById(Long id) {
+
+        var user = userRepository.findById ( id ).orElseThrow ( () ->
+                new UserNotFoundException ( id ) );
+
+        if (!user.getIsActive ( ))
+            throw new UserNotActiveException ( id );
+
+        return userMapper.toUserDTO ( user );
+    }
 }

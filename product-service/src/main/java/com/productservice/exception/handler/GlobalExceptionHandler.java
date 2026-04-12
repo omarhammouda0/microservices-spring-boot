@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -168,6 +169,24 @@ public class GlobalExceptionHandler {
         problemDetail.setProperty ( "code" , "ILLEGAL_STATE" );
         problemDetail.setProperty ( "timestamp" , Instant.now ( ) );
         problemDetail.setProperty ( "path" , request.getDescription ( false ).replace ( "uri=" , "" ) );
+
+        return problemDetail;
+    }
+
+    @ExceptionHandler(ObjectOptimisticLockingFailureException.class)
+    public ProblemDetail handleOptimisticLockException(
+            ObjectOptimisticLockingFailureException ex, WebRequest request) {
+
+        log.warn("Optimistic lock conflict: {}", ex.getMessage());
+
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
+                HttpStatus.CONFLICT,
+                "Resource was modified by another request, please retry"
+        );
+        problemDetail.setTitle("Conflict");
+        problemDetail.setProperty("code", "OPTIMISTIC_LOCK_CONFLICT");
+        problemDetail.setProperty("timestamp", Instant.now());
+        problemDetail.setProperty("path", request.getDescription(false).replace("uri=", ""));
 
         return problemDetail;
     }

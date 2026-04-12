@@ -1,6 +1,7 @@
 package com.productservice.service;
 
 
+import com.productservice.enums.Role;
 import com.productservice.exception.types.NotAuthorizedException;
 import org.springframework.stereotype.Component;
 
@@ -11,7 +12,7 @@ public class HelperService {
 
     public void checkIfAdmin (String userRole) {
 
-        if (!userRole.equals("ADMIN")) {
+        if (!userRole.equals( Role.ADMIN.toString () )) {
             throw new NotAuthorizedException (  );
         }
 
