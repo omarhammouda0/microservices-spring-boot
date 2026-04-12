@@ -5,6 +5,14 @@ spring:
   application:
     name: PRODUCT-SERVICE
 
+  cloud:
+    openfeign:
+      client:
+        config:
+          default:
+            connect-timeout: 2000
+            read-timeout: 5000
+
   datasource:
     url: jdbc:postgresql://postgres-productdb:5432/productdb
     username: ${DB_USERNAME}

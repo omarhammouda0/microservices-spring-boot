@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 
 @FeignClient (name = "PRODUCT-SERVICE")
 
-public interface ProductServiceClient {
+public interface ProductClient {
 
 
     @GetMapping ("/inventory/{productId}")

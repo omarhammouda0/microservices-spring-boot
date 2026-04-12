@@ -1,6 +1,5 @@
 package com.orderservice.service;
 
-import com.orderservice.client.ProductServiceClient;
 import com.orderservice.dto.*;
 import com.orderservice.entity.Order;
 import com.orderservice.enums.OrderStatus;
@@ -30,13 +29,13 @@ public class OrderService {
     private final OrderRepository orderRepository;
     private final OrderItemRepository orderItemRepository;
     private final OrderMapper orderMapper;
-    private final ProductServiceClient productServiceClient;
     private final OrderEventPublisher orderEventPublisher;
     private final HelperService helperService;
+    private final ProductServiceClient productServiceClient;
 
     public InventoryResponseDTO getInventory(Long productId) {
-        return productServiceClient.getInventory
-                ( productId );
+        return productServiceClient.getInventoryByProductId ( productId );
+
     }
 
     public Map<OrderItemRequestDTO, InventoryResponseDTO> stockCheck
@@ -49,7 +48,6 @@ public class OrderService {
                         item -> {
 
                             var inventory = getInventory ( item.productId ( ) );
-
 
                             if (inventory.quantity ( ) < item.quantity ( )) {
                                 throw new StockInsufficient ( item.productId ( ) );
@@ -88,13 +86,11 @@ public class OrderService {
 
                 .build ( );
 
-        helperService.checkUserIdentity ( order.getUserId () , userId );
 
         var savedOrder = orderRepository.save ( order );
         var savedOrderItems = orderItemRepository.saveAll
                 ( orderMapper.toOrderItemList ( orderItems , check , order ) );
 
-        savedOrder.setItems ( savedOrderItems );
 
         savedOrderItems.forEach (
                 item -> {
@@ -182,7 +178,6 @@ public class OrderService {
         return orderMapper.toOrderResponseDto ( order );
 
     }
-
 
 
 }

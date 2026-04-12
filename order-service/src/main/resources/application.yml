@@ -5,6 +5,14 @@ spring:
   application:
     name: ORDER-SERVICE
 
+  cloud:
+    openfeign:
+      client:
+        config:
+          default:
+            connect-timeout: 2000
+            read-timeout: 5000
+
   datasource:
     url: jdbc:postgresql://postgres-orderdb:5432/orderdb
     username: ${DB_USERNAME}
@@ -43,6 +51,34 @@ eureka:
     lease-renewal-interval-in-seconds: 5
     lease-expiration-duration-in-seconds: 10
 
+resilience4j:
+  retry:
+    instances:
+      productservice:
+        max-attempts: 3
+        wait-duration: 500ms
+        enable-exponential-backoff: true
+        exponential-backoff-multiplier: 2
+        exponential-max-wait-duration: 2s
+        retry-exceptions:
+          - feign.FeignException
+          - feign.FeignException.ServiceUnavailable
+          - feign.RetryableException
+          - java.net.ConnectException
+          - java.util.concurrent.TimeoutException
+
+
+  circuitbreaker:
+    instances:
+      productservice:
+        sliding-window-size: 10
+        minimum-number-of-calls: 5
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 10s
+        permitted-number-of-calls-in-half-open-state: 3
+        automatic-transition-from-open-to-half-open-enabled: true
+        record-exceptions:
+          - feign.FeignException
 
 
 management:
