@@ -25,11 +25,13 @@ public class DeadLetterConsumer {
         var orderId = orderCreatedEvent.orderId ( );
         var savedOrder = orderRepository.findById ( orderId );
 
-        savedOrder.ifPresent ( order -> {
-            order.setStatus ( OrderStatus.FAILED );
-            orderRepository.save ( order );
-            log.warn ( "Order {} marked as FAILED due to inventory reduction failure" , orderId );
-                }
+        savedOrder.ifPresentOrElse(
+                order -> {
+                    order.setStatus(OrderStatus.FAILED);
+                    orderRepository.save(order);
+                    log.warn("Order {} marked as FAILED due to inventory reduction failure", orderId);
+                },
+                () -> log.warn("Order {} not found in dead letter handler", orderId)
         );
 
     }

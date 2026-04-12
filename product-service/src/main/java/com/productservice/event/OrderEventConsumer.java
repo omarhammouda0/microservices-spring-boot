@@ -45,6 +45,9 @@ public class OrderEventConsumer {
             throw new InSufficentStockLevel ( productId );
         }
 
+        log.info("Processing order.created event: orderId={}, productId={}, quantity={}",
+                orderId, productId, itemQuantity);
+
         currentQuantity -= itemQuantity ;
         itemInventory.setQuantity ( currentQuantity );
         inventoryRepository.save ( itemInventory );
@@ -77,10 +80,15 @@ public class OrderEventConsumer {
 
             int newQuantity = inventory.getQuantity ( ) + item.quantity ( );
             inventory.setQuantity ( newQuantity );
+
+            log.info("Processing order.cancelled event: orderId={}, items={}",
+                    orderCancelledEvent.orderId(), orderCancelledEvent.items().size());
+
             inventoryRepository.save ( inventory );
             log.info ( "Restored {} units of product {}. New quantity: {}" ,
                     item.quantity ( ) , item.productId ( ) , newQuantity );
         } );
+
 
 
         var event = ProcessedEvent.builder ( )
