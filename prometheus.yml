@@ -28,3 +28,8 @@ scrape_configs:
       - source_labels: [__address__]
         target_label: application
         replacement: api-gateway
+
+  - job_name: 'order-service'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: [ 'order-service:8083' ]

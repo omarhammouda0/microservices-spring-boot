@@ -1,11 +1,13 @@
 package com.productervice.service;
 
 
-import com.productervice.client.UserClient;
-import com.productervice.dto.UserResponseDTO;
-import com.productervice.exception.types.ProductNotFoundException;
-import com.productervice.mapper.ProductMapper;
-import com.productervice.repository.ProductRepository;
+import com.productservice.client.UserClient;
+import com.productservice.dto.UserResponseDTO;
+import com.productservice.exception.types.ProductNotFoundException;
+import com.productservice.mapper.ProductMapper;
+import com.productservice.repository.ProductRepository;
+import com.productservice.service.ProductService;
+import com.productservice.service.UserServiceClient;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

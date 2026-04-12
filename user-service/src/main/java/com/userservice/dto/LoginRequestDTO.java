@@ -9,7 +9,7 @@ public record LoginRequestDTO(
         @Email (message = "Please enter a valid email format")
         String email ,
 
-        @NotBlank (message = "Please enter an password")
+        @NotBlank (message = "Please enter a password")
         String password
 
 ) {

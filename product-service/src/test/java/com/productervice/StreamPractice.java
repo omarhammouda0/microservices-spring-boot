@@ -1,6 +1,6 @@
 package com.productervice;
 
-import com.productervice.entity.Product;
+import com.productservice.entity.Product;
 
 import java.time.Instant;
 import java.util.Comparator;
