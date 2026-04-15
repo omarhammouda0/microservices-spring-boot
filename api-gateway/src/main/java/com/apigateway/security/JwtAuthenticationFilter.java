@@ -20,7 +20,7 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
 
     private final JwtService jwtService;
 
-    private static final List<String> PUBLIC_PATHS = List.of("/auth/");
+    private static final List<String> PUBLIC_PATHS = List.of("/auth/" , "swagger-ui.html");
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
