@@ -18,6 +18,14 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 
+/**
+ * Handles self-registration and login for end users.
+ *
+ * <p>On both register and login, a signed JWT is returned containing the
+ * user's email (subject), id, and role. The API Gateway later uses these
+ * claims to populate the {@code X-User-Id} and {@code X-User-Role} request
+ * headers consumed by downstream services.
+ */
 @AllArgsConstructor
 @Service
 public class AuthService {
@@ -28,6 +36,16 @@ public class AuthService {
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
 
+    /**
+     * Registers a brand-new user account and returns a JWT.
+     *
+     * <p>Passwords are hashed with BCrypt before persistence. If no role is
+     * supplied, the account defaults to {@link Role#USER}.
+     *
+     * @param dto the validated registration payload
+     * @return an {@link AuthResponseDTO} containing the signed JWT
+     * @throws UserAlreadyExistsException if the email is already registered
+     */
     public AuthResponseDTO registerUser(RegisterRequestDTO dto) {
 
         String email = dto.email ( ).trim ( );
@@ -52,6 +70,15 @@ public class AuthService {
 
     }
 
+    /**
+     * Authenticates an existing user and returns a fresh JWT.
+     *
+     * @param dto the login credentials
+     * @return an {@link AuthResponseDTO} containing the signed JWT
+     * @throws InvalidCredentialsException if the email/password combination is wrong
+     * @throws UserNotFoundException       if authentication succeeds but the user lookup fails
+     *                                     (should not happen in practice)
+     */
     public AuthResponseDTO logInUser (LoginRequestDTO dto) {
 
         String email = dto.email ( ).trim ( );

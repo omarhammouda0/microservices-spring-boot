@@ -5,9 +5,9 @@ import com.userservice.dto.LoginRequestDTO;
 import com.userservice.dto.RegisterRequestDTO;
 import com.userservice.service.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirements;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/auth")
 @Validated
 @Tag(name = "Authentication", description = "Endpoints for user authentication and registration")
+@SecurityRequirements // overrides the global BearerAuth — /auth/** is public
 public class AuthController {
 
     private final AuthService authService;

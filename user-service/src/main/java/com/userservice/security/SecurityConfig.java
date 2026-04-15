@@ -75,19 +75,17 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
+                                // Public auth endpoints (login/register)
                                 "/auth/**",
+                                // Actuator (health, prometheus)
                                 "/actuator/**",
+                                // Service-to-service endpoints; reachable only inside Docker network
                                 "/internal/**",
-                                "/swagger-ui/**",
-                                "/swagger-ui.html",
-                                "/v3/api-docs/**",
-                                "/api-docs/**",
-                                "/webjars/**",
-                                "/swagger-resources/**",
+                                // Swagger UI & OpenAPI spec (custom paths from application.yml)
                                 "/user-service/swagger-ui/**",
                                 "/user-service/swagger-ui.html",
-                                "/user-service/api-docs",
-                                "/user-service/v3/api-docs"
+                                "/user-service/api-docs/**",
+                                "/webjars/**"
                         ).permitAll()
                         .anyRequest().authenticated()
                 )
