@@ -20,18 +20,37 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
 
     private final JwtService jwtService;
 
-    private static final List<String> PUBLIC_PATHS = List.of("/auth/" , "swagger-ui.html");
+    private static final List<String> PUBLIC_PATHS = List.of (
+            "/auth/" ,
+            "/swagger-ui" ,
+            "/api-docs" ,
+            "/v3/api-docs" ,
+            "/webjars/" ,
+            "/swagger-resources" ,
+            "/actuator/health"
+    );
+
+    private static final List<String> PUBLIC_SUFFIXES = List.of (
+            "swagger-ui.html" ,
+            "api-docs" ,
+            "v3/api-docs"
+    );
 
     @Override
-    public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
+    public Mono<Void> filter(ServerWebExchange exchange , GatewayFilterChain chain) {
 
-        String path = exchange
-        .getRequest().getURI().getPath();
+        String path = exchange.getRequest ( ).getURI ( ).getPath ( );
 
 
-        if (PUBLIC_PATHS.stream().anyMatch(path::startsWith)) {
-            return chain.filter(exchange);
+        boolean isPublic = PUBLIC_PATHS.stream ( ).anyMatch ( path::startsWith ) ||
+                PUBLIC_SUFFIXES.stream ( ).anyMatch ( path::endsWith );
+
+        if (isPublic) {
+            log.debug ( "Public path accessed: {}" , path );
+            return chain.filter ( exchange );
         }
+
+
 
 
         String authHeader = exchange.getRequest().getHeaders().getFirst("Authorization");

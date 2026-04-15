@@ -6,36 +6,80 @@ spring:
     name: api-gateway
   cloud:
     gateway:
+      globalcors:
+        cors-configurations:
+          '[/**]':
+            allowedOrigins:
+              - "http://localhost:8080"
+              - "http://localhost:3000"
+            allowedMethods:
+              - GET
+              - POST
+              - PUT
+              - PATCH
+              - DELETE
+              - OPTIONS
+            allowedHeaders: "*"
+            allowCredentials: true
+            maxAge: 3600
       default-filters:
         - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin
       routes:
+        # User Service Routes
         - id: user-service
           uri: lb://USER-SERVICE
           predicates:
-            - Path=/users/**
+            - Path=/api/users/**
+          filters:
+            - StripPrefix=1
 
         - id: user-service-auth
           uri: lb://USER-SERVICE
           predicates:
-            - Path=/auth/**
+            - Path=/api/auth/**
+          filters:
+            - StripPrefix=1
 
+        # Swagger route for User Service
+        - id: user-service-swagger
+          uri: lb://USER-SERVICE
+          predicates:
+            - Path=/user-service/**
+
+        # Product Service Routes
         - id: product-service
           uri: lb://PRODUCT-SERVICE
           predicates:
-            - Path=/products/**
+            - Path=/api/products/**
+          filters:
+            - StripPrefix=1
 
         - id: inventory-service
           uri: lb://PRODUCT-SERVICE
           predicates:
-          - Path=/inventory/**
+            - Path=/api/inventory/**
+          filters:
+            - StripPrefix=1
 
+        # Swagger route for Product Service
+        - id: product-service-swagger
+          uri: lb://PRODUCT-SERVICE
+          predicates:
+            - Path=/product-service/**
 
+        # Order Service Routes
         - id: order-service
           uri: lb://ORDER-SERVICE
           predicates:
-            - Path=/orders/**
+            - Path=/api/orders/**
+          filters:
+            - StripPrefix=1
 
-
+        # Swagger route for Order Service
+        - id: order-service-swagger
+          uri: lb://ORDER-SERVICE
+          predicates:
+            - Path=/order-service/**
 
 eureka:
   client:
@@ -47,17 +91,14 @@ eureka:
     instance-id: ${spring.application.name}:${spring.application.instance_id:${random.value}}
 
 management:
-
   metrics:
     distribution:
       percentiles-histogram:
         http.server.requests: true
-
   endpoints:
     web:
       exposure:
         include: health,prometheus
-
   tracing:
     enabled: true
     sampling:
@@ -71,4 +112,26 @@ jwt:
 
 logging:
   level:
-    org.springframework.cloud.gateway: debug
+    org.springframework.cloud.gateway: DEBUG
+
+springdoc:
+  api-docs:
+    path: /api-docs
+    enabled: true
+  swagger-ui:
+    path: /swagger-ui.html
+    enabled: true
+    urls:
+      - name: User Service
+        url: /user-service/api-docs
+      - name: Product Service
+        url: /product-service/api-docs
+      - name: Order Service
+        url: /order-service/api-docs
+
+    operations-sorter: method
+    tags-sorter: alpha
+    display-request-duration: true
+    try-it-out-enabled: true
+    filter: true
+
