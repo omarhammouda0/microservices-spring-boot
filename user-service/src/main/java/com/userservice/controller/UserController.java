@@ -87,7 +87,7 @@ public class UserController {
     })
     public ResponseEntity<Page<UserResponseDTO>> getAllUsers(
             @Parameter(description = "User role (ADMIN required)", required = true) @RequestHeader("X-User-Role") String userRole,
-            @Parameter(description = "Pagination parameters") @PageableDefault(size = 10, sort = "id", direction = Sort.Direction.ASC) Pageable pageable) {
+            @Parameter(description = "Pagination parameters") @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
 
         log.info("Fetching all users with pagination - Page: {}, Size: {}",
                 pageable.getPageNumber(), pageable.getPageSize());
@@ -106,7 +106,7 @@ public class UserController {
     })
     public ResponseEntity<Page<UserResponseDTO>> getAllActiveUsers(
             @Parameter(description = "User role (ADMIN required)", required = true) @RequestHeader("X-User-Role") String userRole,
-            @Parameter(description = "Pagination parameters") @PageableDefault(size = 10, sort = "name", direction = Sort.Direction.ASC) Pageable pageable) {
+            @Parameter(description = "Pagination parameters") @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
 
         log.info("Fetching active users with pagination - Page: {}, Size: {}",
                 pageable.getPageNumber(), pageable.getPageSize());

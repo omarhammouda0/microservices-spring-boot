@@ -81,7 +81,7 @@ public class OrderController {
             @ApiResponse(responseCode = "403", description = "Forbidden - Requires ADMIN role")
     })
     public ResponseEntity<Page<OrderResponseDTO>> getOrders(
-            @Parameter(description = "Pagination parameters") @PageableDefault(size = 10, sort = "id", direction = Sort.Direction.DESC) Pageable pageable,
+            @Parameter(description = "Pagination parameters") @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable,
             @Parameter(description = "User role (ADMIN required)", required = true) @RequestHeader("X-User-Role") String userRole) {
 
         return ResponseEntity.ok(orderService.getOrders(pageable, userRole));

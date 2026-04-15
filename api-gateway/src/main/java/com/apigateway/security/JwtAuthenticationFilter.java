@@ -20,20 +20,18 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
 
     private final JwtService jwtService;
 
-    private static final List<String> PUBLIC_PATHS = List.of (
-            "/auth/" ,
-            "/swagger-ui" ,
-            "/api-docs" ,
-            "/v3/api-docs" ,
-            "/webjars/" ,
-            "/swagger-resources" ,
-            "/actuator/health"
-    );
-
-    private static final List<String> PUBLIC_SUFFIXES = List.of (
-            "swagger-ui.html" ,
-            "api-docs" ,
-            "v3/api-docs"
+    // StripPrefix runs as a routing filter AFTER this GlobalFilter, so the path
+    // at this point still carries the "/api/..." prefix. Match accordingly.
+    private static final List<String> PUBLIC_PATHS = List.of(
+            "/api/auth/",           // login, register, refresh
+            "/swagger-ui",          // gateway's own swagger UI
+            "/api-docs",            // gateway's own OpenAPI spec
+            "/v3/api-docs",         // gateway's own v3 spec
+            "/webjars/",            // swagger-ui static assets
+            "/actuator/health",     // gateway health check
+            "/user-service/",       // proxied swagger routes for user-service
+            "/product-service/",    // proxied swagger routes for product-service
+            "/order-service/"       // proxied swagger routes for order-service
     );
 
     @Override
@@ -41,9 +39,7 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
 
         String path = exchange.getRequest ( ).getURI ( ).getPath ( );
 
-
-        boolean isPublic = PUBLIC_PATHS.stream ( ).anyMatch ( path::startsWith ) ||
-                PUBLIC_SUFFIXES.stream ( ).anyMatch ( path::endsWith );
+        boolean isPublic = PUBLIC_PATHS.stream().anyMatch(path::startsWith);
 
         if (isPublic) {
             log.debug ( "Public path accessed: {}" , path );
