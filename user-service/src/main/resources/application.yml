@@ -44,6 +44,19 @@ eureka:
   server:
     wait-time-in-ms-when-sync-empty: 0
 
+springdoc:
+  api-docs:
+    path: /user-service/api-docs
+    enabled: true
+  swagger-ui:
+    path: /user-service/swagger-ui.html
+    enabled: true
+    operations-sorter: method
+    tags-sorter: alpha
+    display-request-duration: true
+    doc-expansion: none
+    try-it-out-enabled: true
+    filter: true
 
 management:
 
@@ -69,3 +82,4 @@ management:
     distribution:
       percentiles-histogram:
         http.server.requests: true
+

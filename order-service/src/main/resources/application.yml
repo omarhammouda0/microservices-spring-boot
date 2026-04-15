@@ -81,6 +81,19 @@ resilience4j:
         record-exceptions:
           - feign.FeignException
 
+springdoc:
+  api-docs:
+    path: /order-service/api-docs
+    enabled: true
+  swagger-ui:
+    path: /order-service/swagger-ui.html
+    enabled: true
+    operations-sorter: method
+    tags-sorter: alpha
+    display-request-duration: true
+    doc-expansion: none
+    try-it-out-enabled: true
+    filter: true
 
 management:
 
