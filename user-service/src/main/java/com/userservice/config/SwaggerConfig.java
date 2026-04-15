@@ -47,11 +47,8 @@ public class SwaggerConfig {
                                 .url("https://opensource.org/licenses/MIT")))
                 .servers(List.of(
                         new Server()
-                                .url("http://localhost:8081")
-                                .description("Local Development Server (Direct)"),
-                        new Server()
                                 .url("http://localhost:8080/api")
-                                .description("API Gateway Route (Production)")))
+                                .description("API Gateway (all services route through here)")))
                 .addSecurityItem(new SecurityRequirement().addList("BearerAuth"))
                 .components(new io.swagger.v3.oas.models.Components()
                         .addSecuritySchemes("BearerAuth", new SecurityScheme()
