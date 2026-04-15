@@ -45,6 +45,7 @@ eureka:
     wait-time-in-ms-when-sync-empty: 0
 
 springdoc:
+  default-support-pageable: true
   api-docs:
     path: /user-service/api-docs
     enabled: true

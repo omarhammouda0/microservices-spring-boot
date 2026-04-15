@@ -9,9 +9,11 @@ spring:
       globalcors:
         cors-configurations:
           '[/**]':
-            allowedOrigins:
-              - "http://localhost:8080"
+            # allowedOriginPatterns (not allowedOrigins) is required when
+            # allowCredentials=true. Add the hosts your frontend runs on.
+            allowedOriginPatterns:
               - "http://localhost:3000"
+              - "http://localhost:5173"
             allowedMethods:
               - GET
               - POST
@@ -19,7 +21,14 @@ spring:
               - PATCH
               - DELETE
               - OPTIONS
-            allowedHeaders: "*"
+            # Explicit header list; "*" with credentials=true is spec-invalid.
+            allowedHeaders:
+              - Authorization
+              - Content-Type
+              - X-Requested-With
+            exposedHeaders:
+              - Authorization
+              - Content-Type
             allowCredentials: true
             maxAge: 3600
       default-filters:

@@ -84,6 +84,7 @@ resilience4j:
           - feign.FeignException
 
 springdoc:
+  default-support-pageable: true
   api-docs:
     path: /product-service/api-docs
     enabled: true
