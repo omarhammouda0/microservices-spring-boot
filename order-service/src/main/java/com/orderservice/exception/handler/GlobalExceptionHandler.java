@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.data.mapping.PropertyReferenceException;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -169,6 +170,23 @@ public class GlobalExceptionHandler {
         problemDetail.setProperty ( "code" , "ILLEGAL_STATE" );
         problemDetail.setProperty ( "timestamp" , Instant.now ( ) );
         problemDetail.setProperty ( "path" , request.getDescription ( false ).replace ( "uri=" , "" ) );
+
+        return problemDetail;
+    }
+
+    @ExceptionHandler(PropertyReferenceException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ProblemDetail handlePropertyReference(PropertyReferenceException ex, WebRequest request) {
+        log.warn("Invalid sort/property reference: {}", ex.getMessage());
+
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
+                HttpStatus.BAD_REQUEST,
+                "Unknown sort property: '" + ex.getPropertyName() + "'. Please use a valid field name."
+        );
+        problemDetail.setTitle("Invalid Sort Parameter");
+        problemDetail.setProperty("code", "INVALID_SORT_PROPERTY");
+        problemDetail.setProperty("timestamp", Instant.now());
+        problemDetail.setProperty("path", request.getDescription(false).replace("uri=", ""));
 
         return problemDetail;
     }
